@@ -1,6 +1,8 @@
-schema: "./src/schema/**/*.graphql"
+schema: src/schema
 generates:
-  .src/generated/resolvers.ts:
+  ./src/generated/resolvers.ts:
     plugins:
-      - "typescript"
-      - "typescript-resolvers"
+      - typescript
+      - typescript-resolvers
+    config:
+      enumsAsTypes: true
