@@ -1,0 +1,3 @@
+{
+  "references": ["apps/*", "packages/*"]
+}

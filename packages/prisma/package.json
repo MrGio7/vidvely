@@ -1,0 +1,17 @@
+{
+  "name": "@vidvely/prisma",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "prisma": {
+    "schema": "./schema.prisma"
+  },
+  "devDependencies": {
+    "prisma": "^4.10.1"
+  },
+  "dependencies": {
+    "@prisma/client": "^4.10.1"
+  }
+}
