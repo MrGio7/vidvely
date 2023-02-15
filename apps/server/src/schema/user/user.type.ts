@@ -2,7 +2,7 @@ import gql from "graphql-tag";
 
 export default gql`
   type User {
-    id: String
+    id: UUID!
     createdAt: Date!
     updatedAt: Date!
 
