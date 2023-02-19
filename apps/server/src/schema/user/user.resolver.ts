@@ -2,7 +2,9 @@ import { Resolvers } from "../../generated/resolvers";
 
 const userResolver: Resolvers = {
   Query: {
-    users: () => [],
+    users: (_parent, _args, ctx) => {
+      return [];
+    },
   },
 };
 
