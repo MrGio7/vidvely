@@ -16,6 +16,7 @@
     "@apollo/server": "^4.3.3",
     "@graphql-tools/merge": "^8.3.18",
     "@vidvely/prisma": "*",
+    "aws-jwt-verify": "^3.4.0",
     "body-parser": "^1.20.1",
     "cors": "^2.8.5",
     "express": "^4.18.2",
