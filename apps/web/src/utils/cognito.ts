@@ -1,5 +1,4 @@
 import { AuthenticationDetails, CognitoUser, CognitoUserAttribute, CognitoUserPool } from "amazon-cognito-identity-js";
-import { serialize } from "cookie";
 
 export interface Credentials {
   email: string;

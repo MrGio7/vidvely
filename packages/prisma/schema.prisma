@@ -15,18 +15,4 @@ model User {
   email     String?
   firstName String?
   lastName  String?
-
-  UserProviders UserProvider[]
-}
-
-model UserProvider {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  providerId  String
-  providerKey String
-
-  User   User   @relation(fields: [userId], references: [id])
-  userId String
 }

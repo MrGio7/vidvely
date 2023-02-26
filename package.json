@@ -13,8 +13,8 @@
     "typescript": "^4.9.5"
   },
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "apps/server",
+    "packages/prisma"
   ],
   "dependencies": {
     "amazon-cognito-identity-js": "^6.1.2",

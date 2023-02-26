@@ -12,6 +12,7 @@ export default gql`
   }
 
   extend type Query {
+    userInfo: User!
     users: [User!]!
   }
 

@@ -1,3 +1,6 @@
 {
-  "references": ["apps/*", "packages/*"]
+  "references": [
+    { "path": "apps/server" }, //
+    { "path": "packages/prisma" }
+  ]
 }

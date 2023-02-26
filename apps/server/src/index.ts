@@ -10,6 +10,8 @@ import { z } from "zod";
 import axios from "axios";
 import moment from "moment";
 import { CognitoJwtVerifier } from "aws-jwt-verify";
+import { GraphQLError } from "graphql";
+import { prisma } from "@vidvely/prisma";
 
 interface AuthData {
   id_token: string;
@@ -41,7 +43,29 @@ app.use(
 app.use(
   "/graphql",
   expressMiddleware(server, {
-    context: async ({ req }) => ({ token: req.headers.token }),
+    context: async ({ req }) => {
+      const access_token = req.cookies.access_token;
+
+      const verifier = CognitoJwtVerifier.create({
+        userPoolId: "eu-central-1_3JGV6ob34",
+        tokenUse: "access",
+        clientId: "3cermrrihd00fn1742frogg4ip",
+      });
+
+      const { sub: userId } = await verifier.verify(access_token);
+
+      if (!access_token || !userId) throw new GraphQLError("Not Authorized");
+
+      const user = await prisma.user.upsert({
+        where: { id: userId },
+        create: {},
+        update: {},
+      });
+
+      return {
+        user,
+      };
+    },
   })
 );
 
@@ -66,7 +90,7 @@ app.post("/auth", async (req, res) => {
           grant_type: "authorization_code",
           client_id: "3cermrrihd00fn1742frogg4ip",
           code: authCode,
-          redirect_uri: "http://localhost:5173/",
+          redirect_uri: "http://localhost:5173/auth",
         },
         {
           headers: {
@@ -79,14 +103,6 @@ app.post("/auth", async (req, res) => {
         console.error(err);
         throw new Error("auth error");
       });
-
-    const verifier = CognitoJwtVerifier.create({
-      userPoolId: "eu-central-1_3JGV6ob34",
-      tokenUse: "access",
-      clientId: "3cermrrihd00fn1742frogg4ip",
-    });
-
-    const { sub: userId } = await verifier.verify(access_token);
 
     return res
       .status(200)
