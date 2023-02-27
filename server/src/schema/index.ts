@@ -1,6 +1,5 @@
-import { mergeResolvers, mergeTypeDefs } from "@graphql-tools/merge";
 import { makeExecutableSchema } from "@graphql-tools/schema";
-import { typeDefs as scalarTypeDefs } from "graphql-scalars";
+import { typeDefs as scalarTypeDefs, resolvers as scalarResolvers } from "graphql-scalars";
 
 // types
 import userType from "./user/user.type";
@@ -9,8 +8,8 @@ import userType from "./user/user.type";
 import userResolver from "./user/user.resolver";
 
 const schema = makeExecutableSchema({
-  typeDefs: mergeTypeDefs([`type Query`, `type Mutation`, ...scalarTypeDefs, userType]),
-  resolvers: mergeResolvers(userResolver),
+  typeDefs: [`type Query`, `type Mutation`, scalarTypeDefs, userType],
+  resolvers: { ...userResolver },
 });
 
 export default schema;

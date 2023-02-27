@@ -1,17 +1,19 @@
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+import axios from "axios";
 import bodyParser from "body-parser";
 import cors from "cors";
-import express, { response } from "express";
+import express from "express";
 import http from "http";
-import schema from "./schema/index";
-import { z } from "zod";
-import axios from "axios";
 import moment from "moment";
+import { z } from "zod";
+import schema from "./schema/index";
 import { CognitoJwtVerifier } from "aws-jwt-verify";
 import { GraphQLError } from "graphql";
-import { prisma } from "@vidvely/prisma";
+import { prisma } from "../prisma";
+import cookieParser from "cookie-parser";
+import { UnauthorizedError } from "./errors/errors";
 
 interface AuthData {
   id_token: string;
@@ -37,30 +39,30 @@ app.use(
     credentials: true,
     origin: "http://localhost:5173",
   }),
-  bodyParser.json({ limit: "50mb" })
+  bodyParser.json({ limit: "50mb" }),
+  cookieParser()
 );
 
 app.use(
   "/graphql",
   expressMiddleware(server, {
     context: async ({ req }) => {
-      const access_token = req.cookies.access_token;
+      const access_token = req.cookies?.access_token;
+
+      if (!access_token) throw new UnauthorizedError();
 
       const verifier = CognitoJwtVerifier.create({
         userPoolId: "eu-central-1_3JGV6ob34",
         tokenUse: "access",
         clientId: "3cermrrihd00fn1742frogg4ip",
       });
+      const { sub: userId, username } = await verifier.verify(access_token);
 
-      const { sub: userId } = await verifier.verify(access_token);
+      if (!access_token || !userId) throw new UnauthorizedError();
 
-      if (!access_token || !userId) throw new GraphQLError("Not Authorized");
+      let user = await prisma.user.findUnique({ where: { id: userId } });
 
-      const user = await prisma.user.upsert({
-        where: { id: userId },
-        create: {},
-        update: {},
-      });
+      if (!user) user = await prisma.user.create({ data: { id: userId, email: username.includes("@") ? username : undefined } });
 
       return {
         user,
@@ -70,8 +72,6 @@ app.use(
 );
 
 app.post("/auth", async (req, res) => {
-  console.log(req.headers.cookie);
-
   try {
     const bodyScheme = z.object({
       code: z.string().uuid(),
@@ -90,7 +90,7 @@ app.post("/auth", async (req, res) => {
           grant_type: "authorization_code",
           client_id: "3cermrrihd00fn1742frogg4ip",
           code: authCode,
-          redirect_uri: "http://localhost:5173/auth",
+          redirect_uri: "http://localhost:5173/auth/",
         },
         {
           headers: {
@@ -100,7 +100,7 @@ app.post("/auth", async (req, res) => {
       )
       .then((res) => res.data)
       .catch((err) => {
-        console.error(err);
+        console.error(err.response.data);
         throw new Error("auth error");
       });
 

@@ -16,7 +16,7 @@ const Auth: React.FC<AuthProps> = () => {
         { withCredentials: true }
       )
       .then(() => router.redirect("/"))
-      .catch((error) => alert(error.message));
+      .catch((error) => console.log(error));
   }, []);
 
   return <Loader />;
