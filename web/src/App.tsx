@@ -1,15 +1,25 @@
-import "./App.css";
-import { useGetUserInfoQuery } from "./graphql/generated";
-import Loader from "./loader";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { httpBatchLink } from "@trpc/client";
+import React, { useState } from "react";
+import { trpc } from "./utils/trpc";
+import IndexPage from "./pages";
 
-function App() {
-  const { loading, error, data } = useGetUserInfoQuery();
-
-  if (!!loading) return <Loader />;
-
-  if (!data) return <h1>No Data</h1>;
-
-  return <div className="App">HI1</div>;
+export function App() {
+  const [queryClient] = useState(() => new QueryClient());
+  const [trpcClient] = useState(() =>
+    trpc.createClient({
+      links: [
+        httpBatchLink({
+          url: "http://localhost:3000",
+        }),
+      ],
+    })
+  );
+  return (
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <IndexPage />
+      </QueryClientProvider>
+    </trpc.Provider>
+  );
 }
-
-export default App;

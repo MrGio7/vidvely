@@ -1,42 +1,29 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "description": "",
+  "main": "src/server.ts",
   "scripts": {
-    "watch:esbuild": "node esbuild.dev.mjs",
-    "watch:nodemon": "nodemon dist/index.js --watch dist/index.js",
-    "start:dev": "npm-run-all --parallel watch:**",
-    "start": "npm run build && node ./dist/index.js",
-    "codegen": "graphql-codegen",
-    "prisma:push": "prisma db push"
+    "dev": "sls offline"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "@apollo/server": "^4.3.3",
-    "@prisma/client": "^4.10.1",
-    "aws-jwt-verify": "^3.4.0",
+    "@prisma/client": "^4.11.0",
+    "@trpc/server": "^10.14.0",
+    "aws-lambda": "^1.0.7",
     "axios": "^1.3.4",
-    "body-parser": "^1.20.1",
-    "cookie-parser": "^1.4.6",
-    "cors": "^2.8.5",
-    "express": "^4.18.2",
-    "graphql": "^16.6.0",
-    "graphql-scalars": "^1.20.1",
-    "graphql-tag": "^2.12.6",
-    "moment": "^2.29.4",
     "zod": "^3.20.6"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "^3.2.1",
-    "@graphql-codegen/typescript": "^3.0.0",
-    "@graphql-codegen/typescript-resolvers": "^3.0.0",
-    "@types/cookie-parser": "^1.4.3",
-    "@types/cors": "^2.8.13",
-    "esbuild": "^0.17.10",
-    "nodemon": "^2.0.20",
-    "npm-run-all": "^4.1.5",
-    "prisma": "^4.10.1"
+    "@serverless/typescript": "^3.27.0",
+    "@types/aws-lambda": "^8.10.111",
+    "@types/node": "^18.14.5",
+    "nodemon": "^2.0.21",
+    "prisma": "^4.11.0",
+    "serverless-esbuild": "^1.39.0",
+    "serverless-offline": "^12.0.4",
+    "ts-node": "^10.9.1"
   }
 }
