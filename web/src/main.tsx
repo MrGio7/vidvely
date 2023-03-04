@@ -1,10 +1,18 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { App } from "./App";
+import ReactDOM from "react-dom";
+
+import { MeetingProvider, lightTheme } from "amazon-chime-sdk-component-library-react";
+import { ThemeProvider } from "styled-components";
+import Meeting from "./components/Meeting";
+import MeetingForm from "./components/MeetingForm";
+
 import "./index.css";
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+ReactDOM.render(
+  <ThemeProvider theme={lightTheme}>
+    <MeetingProvider>
+      <MeetingForm />
+      <Meeting />
+    </MeetingProvider>
+  </ThemeProvider>,
+  document.getElementById("root")
 );

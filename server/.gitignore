@@ -135,3 +135,7 @@ jspm_packages
 
 # Serverless directories
 .serverless
+
+# build
+.esbuild/*
+.build/*

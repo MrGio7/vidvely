@@ -4,6 +4,7 @@ import { CreateAWSLambdaContextOptions, awsLambdaRequestHandler } from "@trpc/se
 import { APIGatewayProxyEventV2 } from "aws-lambda";
 import axios from "axios";
 import { z } from "zod";
+import { createChimeMeeting, endChimeMeeting, joinChimeMeeting } from "./chime";
 
 interface AuthData {
   id_token: string;
@@ -12,6 +13,8 @@ interface AuthData {
   expires_in: number;
   token_type: string;
 }
+
+export const prisma = new PrismaClient();
 
 function createContext({ event, context }: CreateAWSLambdaContextOptions<APIGatewayProxyEventV2>) {
   return {
@@ -67,9 +70,89 @@ const appRouter = router({
       };
     }
   }),
-});
 
-export const prisma = new PrismaClient();
+  createMeeting: publicProcedure
+    .input(
+      z.object({
+        name: z.string(),
+        title: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        return createChimeMeeting({
+          name: input.name,
+          title: input.title,
+        });
+      } catch (error) {
+        console.error(error);
+
+        throw new Error("create meeting error");
+      }
+    }),
+
+  joinMeeting: publicProcedure
+    .input(
+      z.object({
+        meetingId: z.string(),
+        name: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        return joinChimeMeeting({ ...input });
+      } catch (error) {
+        console.error(error);
+
+        throw new Error("join meeting error");
+      }
+    }),
+
+  endMeeting: publicProcedure.input(z.object({ meetingId: z.string() })).mutation(async ({ ctx, input }) => {
+    try {
+      return endChimeMeeting(input.meetingId);
+    } catch (error) {
+      console.error(error);
+
+      return {
+        error: "end meeting error",
+      };
+    }
+  }),
+
+  getUserFromDB: publicProcedure.input(z.object({ userId: z.string() })).query(async ({ ctx, input }) => {
+    return prisma.user.findUnique({ where: { id: input.userId } });
+  }),
+
+  getMeetingFromDB: publicProcedure.input(z.object({ meetingId: z.string() })).query(async ({ ctx, input }) => {
+    return prisma.meeting.findUnique({ where: { id: input.meetingId } });
+  }),
+
+  addUserToDB: publicProcedure.input(z.object({ id: z.string(), name: z.string() })).mutation(async ({ ctx, input }) => {
+    try {
+      return prisma.user.create({
+        data: {
+          id: input.id,
+          firstName: input.name,
+        },
+      });
+    } catch (error) {
+      console.error(error);
+
+      throw new Error("Internal Server Error");
+    }
+  }),
+
+  addMeetingToDB: publicProcedure.input(z.object({ id: z.string(), title: z.string(), data: z.string() })).mutation(async ({ ctx, input }) => {
+    try {
+      return prisma.meeting.create({ data: { ...input } });
+    } catch (error) {
+      console.error(error);
+
+      throw new Error("Internal Server Error");
+    }
+  }),
+});
 
 export type AppRouter = typeof appRouter;
 
