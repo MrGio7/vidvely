@@ -26,7 +26,7 @@ const MeetingForm: FC = () => {
     const title = meetingTitle.trim().toLocaleLowerCase();
     const name = attendeeName.trim();
 
-    const meeting = await trpcProxy.getMeetingFromDB.query({ meetingId: title });
+    const meeting = await trpcProxy.getMeetingFromDB.query({ title });
 
     try {
       if (!!meeting) {
@@ -34,7 +34,7 @@ const MeetingForm: FC = () => {
 
         await trpcProxy.addUserToDB.mutate({ id: joinInfo.Attendee?.AttendeeId!, name });
 
-        const meetingSessionConfiguration = new MeetingSessionConfiguration({ meetingId: meeting.id, ExternalMeetingId: title }, joinInfo.Attendee);
+        const meetingSessionConfiguration = new MeetingSessionConfiguration(JSON.parse(meeting.data!), joinInfo.Attendee);
 
         await meetingManager.join(meetingSessionConfiguration);
       } else {

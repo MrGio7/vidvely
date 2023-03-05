@@ -124,8 +124,8 @@ const appRouter = router({
     return prisma.user.findUnique({ where: { id: input.userId } });
   }),
 
-  getMeetingFromDB: publicProcedure.input(z.object({ meetingId: z.string() })).query(async ({ ctx, input }) => {
-    return prisma.meeting.findUnique({ where: { id: input.meetingId } });
+  getMeetingFromDB: publicProcedure.input(z.object({ title: z.string() })).query(async ({ ctx, input }) => {
+    return prisma.meeting.findFirst({ where: { title: input.title } });
   }),
 
   addUserToDB: publicProcedure.input(z.object({ id: z.string(), name: z.string() })).mutation(async ({ ctx, input }) => {
