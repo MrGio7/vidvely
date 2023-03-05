@@ -75,8 +75,10 @@ web_modules/
 # dotenv environment variable files
 .env
 .env.development.local
+.env.development
 .env.test.local
 .env.production.local
+.env.production
 .env.local
 
 # parcel-bundler cache (https://parceljs.org/)
@@ -137,5 +139,6 @@ jspm_packages
 .serverless
 
 # build
-.esbuild/*
-.build/*
+.esbuild
+.build
+.layers

@@ -1,10 +1,10 @@
-import { PrismaClient } from "@prisma/client";
 import { inferAsyncReturnType, initTRPC } from "@trpc/server";
 import { CreateAWSLambdaContextOptions, awsLambdaRequestHandler } from "@trpc/server/adapters/aws-lambda";
-import { APIGatewayProxyEventV2 } from "aws-lambda";
+import { APIGatewayProxyEvent, APIGatewayProxyEventV2 } from "aws-lambda";
 import axios from "axios";
 import { z } from "zod";
 import { createChimeMeeting, endChimeMeeting, joinChimeMeeting } from "./chime";
+import { prisma } from "/opt/client";
 
 interface AuthData {
   id_token: string;
@@ -14,9 +14,7 @@ interface AuthData {
   token_type: string;
 }
 
-export const prisma = new PrismaClient();
-
-function createContext({ event, context }: CreateAWSLambdaContextOptions<APIGatewayProxyEventV2>) {
+function createContext({ event, context }: CreateAWSLambdaContextOptions<APIGatewayProxyEvent>) {
   return {
     event: event,
     apiVersion: (event as { version?: string }).version || "1.0",

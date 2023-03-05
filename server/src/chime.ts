@@ -11,7 +11,7 @@ interface JoinChimeMeetingInput {
   name: string;
 }
 
-const chime = new ChimeClient({ region: process.env.AWS_REGION });
+const chime = new ChimeClient({ region: "eu-central-1" });
 
 export const createChimeMeeting = async ({ name, title }: CreateChimeMeetingInput) => {
   const createMeetingCommand = new CreateMeetingCommand({

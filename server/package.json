@@ -4,7 +4,12 @@
   "description": "",
   "main": "src/server.ts",
   "scripts": {
-    "dev": "sls offline"
+    "dev": "cross-env NODE_ENV=local sls offline start",
+    "prisma:build": "ts-node esbuild.layers.ts",
+    "prisma:generate": "prisma generate",
+    "package:dev": "cross-env NODE_ENV=development sls package",
+    "predeploy:dev": "npm run prisma:generate && npm run prisma:build",
+    "deploy:dev": "cross-env NODE_ENV=development sls deploy"
   },
   "keywords": [],
   "author": "",
@@ -23,8 +28,12 @@
     "@types/aws-lambda": "^8.10.111",
     "@types/node": "^18.14.5",
     "@types/uuid": "^9.0.1",
-    "nodemon": "^2.0.21",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.0.3",
+    "esbuild": "^0.17.11",
+    "esbuild-plugin-copy": "^2.0.2",
     "prisma": "^4.11.0",
+    "serverless": "^3.28.1",
     "serverless-esbuild": "^1.39.0",
     "serverless-offline": "^12.0.4",
     "ts-node": "^10.9.1"

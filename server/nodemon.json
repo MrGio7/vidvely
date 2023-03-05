@@ -1,4 +1,0 @@
-{
-  "exec": "sls offline",
-  "ext": "*.ts"
-}
