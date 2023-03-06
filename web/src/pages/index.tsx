@@ -1,14 +1,15 @@
-import { MeetingStatus, useMeetingStatus } from "amazon-chime-sdk-component-library-react";
-import Meeting from "../components/Meeting";
-import MeetingForm from "../components/MeetingForm";
+import React from "react";
+import { Link } from "react-router-dom";
 
-export default function IndexPage() {
-  const meetingStatus = useMeetingStatus();
+interface RootProps {}
 
+const Root: React.FC<RootProps> = () => {
   return (
-    <main className="h-[100dvh] flex flex-col items-center justify-between">
-      {meetingStatus !== MeetingStatus.Succeeded && <MeetingForm />}
-      {meetingStatus !== MeetingStatus.Loading && <Meeting />}
+    <main>
+      <h1>hi, you are logged in</h1>
+      <Link to="/meeting">Go To Meeting</Link>
     </main>
   );
-}
+};
+
+export default Root;

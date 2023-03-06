@@ -3,6 +3,7 @@ import React, { ChangeEvent, FC, FormEvent, useState } from "react";
 import { Flex, FormField, Input, PrimaryButton, useMeetingManager } from "amazon-chime-sdk-component-library-react";
 import { trpcProxy, trpc } from "../utils/trpc";
 import { MeetingSessionConfiguration } from "amazon-chime-sdk-js";
+import { redirect } from "react-router-dom";
 
 const MeetingForm: FC = () => {
   const meetingManager = useMeetingManager();

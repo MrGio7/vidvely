@@ -4,7 +4,21 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import trpcConfig from "./config/trpc.config";
 import { trpc } from "./utils/trpc";
 
-import IndexPage from "./pages";
+import Root from "./pages";
+import Meeting from "./pages/meeting";
+
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Root />,
+  },
+  {
+    path: "/meeting",
+    element: <Meeting />,
+  },
+]);
 
 export function App() {
   const [queryClient] = useState(() => new QueryClient());
@@ -13,7 +27,7 @@ export function App() {
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
-        <IndexPage />
+        <RouterProvider router={router} />
       </QueryClientProvider>
     </trpc.Provider>
   );
