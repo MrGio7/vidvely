@@ -1,7 +1,7 @@
 import React, { ChangeEvent, FC, FormEvent, useState } from "react";
 
 import { Flex, FormField, Input, PrimaryButton, useMeetingManager } from "amazon-chime-sdk-component-library-react";
-import { trpcProxy } from "../utils/trpc";
+import { trpcProxy, trpc } from "../utils/trpc";
 import { MeetingSessionConfiguration } from "amazon-chime-sdk-js";
 
 const MeetingForm: FC = () => {
@@ -28,6 +28,7 @@ const MeetingForm: FC = () => {
 
     const meeting = await trpcProxy.getMeetingFromDB.query({ title });
 
+    debugger;
     try {
       if (!!meeting) {
         const joinInfo = await trpcProxy.joinMeeting.mutate({ meetingId: meeting.id, name });

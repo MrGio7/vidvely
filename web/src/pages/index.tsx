@@ -1,11 +1,11 @@
-import { trpc } from "../utils/trpc";
+import Meeting from "../components/Meeting";
+import MeetingForm from "../components/MeetingForm";
 
 export default function IndexPage() {
-  const hello = trpc.greet.useQuery({ name: "Giorgi" });
-  if (!hello.data) return <div>Loading...</div>;
   return (
-    <div>
-      <p>{hello.data}</p>
-    </div>
+    <>
+      <MeetingForm />
+      <Meeting />
+    </>
   );
 }

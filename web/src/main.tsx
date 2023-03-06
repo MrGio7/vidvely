@@ -6,12 +6,12 @@ import Meeting from "./components/Meeting";
 import MeetingForm from "./components/MeetingForm";
 
 import "./index.css";
+import { App } from "./App";
 
 ReactDOM.render(
   <ThemeProvider theme={lightTheme}>
     <MeetingProvider>
-      <MeetingForm />
-      <Meeting />
+      <App />
     </MeetingProvider>
   </ThemeProvider>,
   document.getElementById("root")
