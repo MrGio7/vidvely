@@ -6,6 +6,7 @@
   "scripts": {
     "local": "vite --mode localhost",
     "dev": "vite --host",
+    "prebuild": "npm i --prefix ../server && npm i",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
