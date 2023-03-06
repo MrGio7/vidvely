@@ -14,12 +14,8 @@ interface AuthData {
   token_type: string;
 }
 
-function createContext({ event, context }: CreateAWSLambdaContextOptions<APIGatewayProxyEvent>) {
-  return {
-    event: event,
-    apiVersion: (event as { version?: string }).version || "1.0",
-    user: event.headers["x-user"],
-  };
+function createContext({ event, context }: CreateAWSLambdaContextOptions<APIGatewayProxyEventV2>) {
+  return {};
 }
 
 type Context = inferAsyncReturnType<typeof createContext>;
@@ -31,7 +27,7 @@ const router = t.router;
 
 const appRouter = router({
   greet: publicProcedure.input(z.object({ name: z.string() })).query(async ({ input, ctx }) => {
-    return `Greeting, ${input.name}. x-user?: ${ctx.user}.`;
+    return `Greeting, ${input.name}.`;
   }),
 
   auth: publicProcedure.input(z.object({ code: z.string().uuid() })).query(async ({ ctx, input }) => {
@@ -157,4 +153,12 @@ export type AppRouter = typeof appRouter;
 export const handler = awsLambdaRequestHandler({
   router: appRouter,
   createContext,
+  responseMeta: () => ({
+    headers: {
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
+    },
+    status: 200,
+  }),
 });

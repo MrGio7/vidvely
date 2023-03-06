@@ -10,8 +10,8 @@ export function App() {
     trpc.createClient({
       links: [
         httpBatchLink({
-          // url: "http://localhost:3000",
-          url: "https://siq1t7htjb.execute-api.eu-central-1.amazonaws.com/dev",
+          // url: "http://localhost:3000/dev",
+          url: "https://8m52d30ic9.execute-api.eu-central-1.amazonaws.com",
         }),
       ],
     })

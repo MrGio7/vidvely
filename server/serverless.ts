@@ -11,6 +11,9 @@ const serverlessConfiguration: AWS = {
     runtime: "nodejs14.x",
     region: "eu-central-1",
     profile: "MrGio7",
+    httpApi: {
+      cors: true,
+    },
     environment: {
       DATABASE_URL: process.env.DATABASE_URL!,
     },
@@ -23,7 +26,7 @@ const serverlessConfiguration: AWS = {
 
   custom: {
     esbuild: {
-      external: ["/opt/client"],
+      external: process.env.NODE_ENV !== "local" ? ["/opt/client"] : [],
     },
   },
 
@@ -35,9 +38,23 @@ const serverlessConfiguration: AWS = {
   },
 
   functions: {
-    "vidvely-rest-api": {
+    // "vidvely-rest-api": {
+    //   handler: "src/server.handler",
+    //   events: [
+    //     {
+    //       http: {
+    //         path: "/{proxy+}",
+    //         method: "any",
+    //         cors: true,
+    //       },
+    //     },
+    //   ],
+    //   layers: [{ Ref: "PrismaLambdaLayer" }],
+    // },
+
+    "vidvely-http-api": {
       handler: "src/server.handler",
-      events: [{ http: { path: "/{proxy+}", method: "any", cors: true } }],
+      events: [{ httpApi: "OPTIONS /{proxy+}" }, { httpApi: "*" }],
       layers: [{ Ref: "PrismaLambdaLayer" }],
     },
   },
