@@ -1,12 +1,6 @@
-import { createTRPCProxyClient, createTRPCReact, httpBatchLink } from "@trpc/react-query";
+import { createTRPCProxyClient, createTRPCReact } from "@trpc/react-query";
 import type { AppRouter } from "../../../server/src/appRouter";
+import trpcConfig from "../config/trpc.config";
 
 export const trpc = createTRPCReact<AppRouter>();
-export const trpcProxy = createTRPCProxyClient<AppRouter>({
-  links: [
-    httpBatchLink({
-      // url: "http://localhost:3000/dev",
-      url: "https://8m52d30ic9.execute-api.eu-central-1.amazonaws.com",
-    }),
-  ],
-});
+export const trpcProxy = createTRPCProxyClient<AppRouter>(trpcConfig);

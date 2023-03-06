@@ -4,6 +4,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyEventV2 } from "aws-lambda";
 import axios from "axios";
 import { z } from "zod";
 import { createChimeMeeting, endChimeMeeting, joinChimeMeeting } from "./chime";
+// @ts-ignore
 import { prisma } from "/opt/client";
 
 interface AuthData {

@@ -27,10 +27,10 @@ const Meeting: FC = () => {
   };
 
   return (
-    <div style={{ marginTop: "2rem", height: "40rem", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-      <VideoTileGrid />
+    <div className="h-[calc(100%-5rem)] w-full flex flex-col justify-between">
+      <VideoTileGrid layout="standard" className="h-full" />
       {meetingStatus === MeetingStatus.Succeeded ? (
-        <ControlBar layout="undocked-horizontal" showLabels>
+        <ControlBar layout="bottom" showLabels>
           <AudioInputControl />
           <VideoInputControl />
           <AudioOutputControl />

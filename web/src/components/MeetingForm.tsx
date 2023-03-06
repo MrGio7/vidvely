@@ -28,7 +28,6 @@ const MeetingForm: FC = () => {
 
     const meeting = await trpcProxy.getMeetingFromDB.query({ title });
 
-    debugger;
     try {
       if (!!meeting) {
         const joinInfo = await trpcProxy.joinMeeting.mutate({ meetingId: meeting.id, name });
@@ -57,7 +56,7 @@ const MeetingForm: FC = () => {
   };
 
   return (
-    <form>
+    <form className="w-5/6">
       <FormField
         field={Input}
         label="Meeting Id"
@@ -82,7 +81,7 @@ const MeetingForm: FC = () => {
           setName(e.target.value);
         }}
       />
-      <Flex container layout="fill-space-centered" style={{ marginTop: "2.5rem" }}>
+      <Flex container justifyContent="center" className="w-full mt-10">
         <PrimaryButton label="Join Meeting" onClick={clickedJoinMeeting} />
       </Flex>
     </form>
