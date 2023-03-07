@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/server.ts",
   "scripts": {
-    "dev": "cross-env NODE_ENV=local sls offline start",
+    "dev": "cross-env NODE_ENV=local sls offline",
     "prisma:build": "ts-node esbuild.layers.ts",
     "prisma:generate": "prisma generate",
     "package:dev": "cross-env NODE_ENV=development sls package",
@@ -27,6 +27,7 @@
   "devDependencies": {
     "@serverless/typescript": "^3.27.0",
     "@types/aws-lambda": "^8.10.111",
+    "@types/axios": "^0.14.0",
     "@types/node": "^18.14.5",
     "@types/uuid": "^9.0.1",
     "cross-env": "^7.0.3",

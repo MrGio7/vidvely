@@ -1,13 +1,13 @@
 import { useState } from "react";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import trpcConfig from "./config/trpc.config";
-import { trpc } from "./utils/trpc";
+import { trpc, trpcConfig } from "./utils/trpc";
 
 import Root from "./pages";
-import Meeting from "./pages/meeting";
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { parseCookies, setCookie } from "nookies";
+import Auth from "./pages/auth";
 
 const router = createBrowserRouter([
   {
@@ -15,8 +15,8 @@ const router = createBrowserRouter([
     element: <Root />,
   },
   {
-    path: "/meeting",
-    element: <Meeting />,
+    path: "/auth",
+    element: <Auth />,
   },
 ]);
 

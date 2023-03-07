@@ -1,9 +1,9 @@
-import { inferAsyncReturnType, initTRPC } from "@trpc/server";
+import { TRPCError, inferAsyncReturnType, initTRPC } from "@trpc/server";
 import { CreateAWSLambdaContextOptions, awsLambdaRequestHandler } from "@trpc/server/adapters/aws-lambda";
 import { APIGatewayProxyEvent, APIGatewayProxyEventV2 } from "aws-lambda";
 import axios from "axios";
 import { z } from "zod";
-import { createChimeMeeting, endChimeMeeting, joinChimeMeeting } from "./chime";
+import { createChimeMeeting, endChimeMeeting, joinChimeMeeting } from "../chime";
 // @ts-ignore
 import { prisma } from "/opt/client";
 
@@ -27,10 +27,14 @@ const publicProcedure = t.procedure;
 const router = t.router;
 
 const appRouter = router({
-  greet: publicProcedure.input(z.object({ name: z.string() })).query(async ({ input, ctx }) => {
-    return `Greeting, ${input.name}.`;
+  setC: publicProcedure.query(async () => {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+    });
+    return {
+      access_token: "Random_access_token",
+    };
   }),
-
   auth: publicProcedure.input(z.object({ code: z.string().uuid() })).query(async ({ ctx, input }) => {
     try {
       const authCode = input.code;
@@ -50,19 +54,13 @@ const appRouter = router({
             },
           }
         )
-        .then((res) => res.data)
-        .catch((err) => {
-          console.error(err.response.data);
-          throw new Error("auth error");
-        });
+        .then((res) => res.data);
 
       return authData;
     } catch (error) {
-      console.log(error);
+      console.error(error);
 
-      return {
-        error: "auth error",
-      };
+      throw new Error("Internal Server Error");
     }
   }),
 
@@ -151,15 +149,17 @@ const appRouter = router({
 
 export type AppRouter = typeof appRouter;
 
-export const handler = awsLambdaRequestHandler({
+export const trpc = awsLambdaRequestHandler({
   router: appRouter,
   createContext,
-  responseMeta: () => ({
-    headers: {
-      "Access-Control-Allow-Headers": "Content-Type",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
-    },
-    status: 200,
-  }),
+
+  responseMeta: ({ ctx, data }) => {
+    return {
+      headers: {
+        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
+      },
+    };
+  },
 });

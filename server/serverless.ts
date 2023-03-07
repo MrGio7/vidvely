@@ -4,7 +4,7 @@ dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 import type { AWS } from "@serverless/typescript";
 
 const serverlessConfiguration: AWS = {
-  service: "vidvely-server",
+  service: "vidvely",
   frameworkVersion: "3",
   provider: {
     name: "aws",
@@ -38,23 +38,14 @@ const serverlessConfiguration: AWS = {
   },
 
   functions: {
-    // "vidvely-rest-api": {
-    //   handler: "src/server.handler",
-    //   events: [
-    //     {
-    //       http: {
-    //         path: "/{proxy+}",
-    //         method: "any",
-    //         cors: true,
-    //       },
-    //     },
-    //   ],
-    //   layers: [{ Ref: "PrismaLambdaLayer" }],
-    // },
-
-    "vidvely-http-api": {
-      handler: "src/server.handler",
+    trpc: {
+      handler: "src/handlers.trpc",
       events: [{ httpApi: "OPTIONS /{proxy+}" }, { httpApi: "*" }],
+      layers: [{ Ref: "PrismaLambdaLayer" }],
+    },
+    auth: {
+      handler: "src/handlers.auth",
+      events: [{ httpApi: "OPTIONS /" }, { httpApi: "POST /" }],
       layers: [{ Ref: "PrismaLambdaLayer" }],
     },
   },
