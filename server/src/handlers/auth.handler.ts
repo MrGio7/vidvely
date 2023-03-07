@@ -1,5 +1,7 @@
+import { CognitoJwtVerifier } from "aws-jwt-verify";
 import { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2, Context } from "aws-lambda";
 import axios from "axios";
+import { prisma } from "/opt/client";
 
 interface AuthData {
   id_token: string;
@@ -38,6 +40,20 @@ async function authCodeHandler(authCode: string) {
     .catch((error) => console.error(error));
 
   if (!authData) return response({ statusCode: 401 });
+
+  const verifier = CognitoJwtVerifier.create({
+    userPoolId: "eu-central-1_3JGV6ob34",
+    tokenUse: "access",
+    clientId: "3cermrrihd00fn1742frogg4ip",
+  });
+
+  const payload = await verifier.verify(authData.access_token);
+
+  await prisma.user.upsert({
+    where: { id: payload.sub },
+    create: { id: payload.sub, userName: payload.username },
+    update: {},
+  });
 
   return response({
     statusCode: 200,

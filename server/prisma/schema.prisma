@@ -17,6 +17,8 @@ model User {
   userName  String?
   firstName String?
   lastName  String?
+
+  meetings Meeting[]
 }
 
 model Meeting {
@@ -24,6 +26,13 @@ model Meeting {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  title String
-  data  String
+  data   String
+  status MeetingStatus @default(IN_PROGRESS)
+
+  users User[]
+}
+
+enum MeetingStatus {
+  IN_PROGRESS
+  ENDED
 }

@@ -1,22 +1,38 @@
 import { TRPCError, inferAsyncReturnType, initTRPC } from "@trpc/server";
 import { CreateAWSLambdaContextOptions, awsLambdaRequestHandler } from "@trpc/server/adapters/aws-lambda";
-import { APIGatewayProxyEvent, APIGatewayProxyEventV2 } from "aws-lambda";
-import axios from "axios";
+import { APIGatewayProxyEventV2 } from "aws-lambda";
 import { z } from "zod";
 import { createChimeMeeting, endChimeMeeting, joinChimeMeeting } from "../chime";
 // @ts-ignore
 import { prisma } from "/opt/client";
+import { CognitoJwtVerifier } from "aws-jwt-verify";
 
-interface AuthData {
-  id_token: string;
-  access_token: string;
-  refresh_token: string;
-  expires_in: number;
-  token_type: string;
+async function getUserId(access_token: string) {
+  const verifier = CognitoJwtVerifier.create({
+    userPoolId: "eu-central-1_3JGV6ob34",
+    tokenUse: "access",
+    clientId: "3cermrrihd00fn1742frogg4ip",
+  });
+
+  try {
+    const payload = await verifier.verify(access_token);
+
+    return payload.sub;
+  } catch {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
 }
 
-function createContext({ event, context }: CreateAWSLambdaContextOptions<APIGatewayProxyEventV2>) {
-  return {};
+async function createContext({ event, context }: CreateAWSLambdaContextOptions<APIGatewayProxyEventV2>) {
+  const access_token = event.cookies?.find((cookie) => cookie.startsWith("access_token"))?.substring(13);
+
+  if (!access_token) throw new TRPCError({ code: "UNAUTHORIZED" });
+
+  const userId = await getUserId(access_token);
+
+  return {
+    userId,
+  };
 }
 
 type Context = inferAsyncReturnType<typeof createContext>;
@@ -27,123 +43,63 @@ const publicProcedure = t.procedure;
 const router = t.router;
 
 const appRouter = router({
-  setC: publicProcedure.query(async () => {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
+  createMeeting: publicProcedure.mutation(async ({ ctx, input }) => {
+    const { userId } = ctx;
+
+    const meetingInfo = await createChimeMeeting();
+
+    if (!meetingInfo.Meeting) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: "meeting id is not defined" });
+
+    await prisma.meeting.create({
+      data: {
+        id: meetingInfo.Meeting.MeetingId,
+        data: JSON.stringify(meetingInfo),
+        users: { connect: { id: userId } },
+      },
     });
-    return {
-      access_token: "Random_access_token",
-    };
+
+    return meetingInfo;
   }),
-  auth: publicProcedure.input(z.object({ code: z.string().uuid() })).query(async ({ ctx, input }) => {
-    try {
-      const authCode = input.code;
-
-      const authData: AuthData = await axios
-        .post(
-          "https://vidvaley-dev.auth.eu-central-1.amazoncognito.com/oauth2/token",
-          {
-            grant_type: "authorization_code",
-            client_id: "3cermrrihd00fn1742frogg4ip",
-            code: authCode,
-            redirect_uri: "http://localhost:5173/auth/",
-          },
-          {
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-            },
-          }
-        )
-        .then((res) => res.data);
-
-      return authData;
-    } catch (error) {
-      console.error(error);
-
-      throw new Error("Internal Server Error");
-    }
-  }),
-
-  createMeeting: publicProcedure
-    .input(
-      z.object({
-        name: z.string(),
-        title: z.string(),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      try {
-        return createChimeMeeting({
-          name: input.name,
-          title: input.title,
-        });
-      } catch (error) {
-        console.error(error);
-
-        throw new Error("create meeting error");
-      }
-    }),
 
   joinMeeting: publicProcedure
     .input(
       z.object({
         meetingId: z.string(),
-        name: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      try {
-        return joinChimeMeeting({ ...input });
-      } catch (error) {
-        console.error(error);
+      const { userId } = ctx;
+      const { meetingId } = input;
 
-        throw new Error("join meeting error");
-      }
+      await prisma.user.update({ where: { id: userId }, data: { meetings: { connect: { id: meetingId } } } });
+
+      return joinChimeMeeting({ meetingId, userId });
     }),
 
   endMeeting: publicProcedure.input(z.object({ meetingId: z.string() })).mutation(async ({ ctx, input }) => {
-    try {
-      return endChimeMeeting(input.meetingId);
-    } catch (error) {
-      console.error(error);
+    const { meetingId } = input;
 
-      return {
-        error: "end meeting error",
-      };
-    }
+    await endChimeMeeting(meetingId);
+
+    await prisma.meeting.update({
+      where: { id: meetingId },
+      data: { status: "ENDED" },
+    });
   }),
 
-  getUserFromDB: publicProcedure.input(z.object({ userId: z.string() })).query(async ({ ctx, input }) => {
-    return prisma.user.findUnique({ where: { id: input.userId } });
+  userInfo: publicProcedure.query(async ({ ctx }) => {
+    return prisma.user.findUnique({ where: { id: ctx.userId } });
   }),
 
-  getMeetingFromDB: publicProcedure.input(z.object({ title: z.string() })).query(async ({ ctx, input }) => {
-    return prisma.meeting.findFirst({ where: { title: input.title } });
+  getMeeting: publicProcedure.input(z.object({ meetingId: z.string().uuid() })).query(async ({ ctx, input }) => {
+    const { meetingId } = input;
+
+    return prisma.meeting.findUnique({ where: { id: meetingId } });
   }),
 
-  addUserToDB: publicProcedure.input(z.object({ id: z.string(), name: z.string() })).mutation(async ({ ctx, input }) => {
-    try {
-      return prisma.user.create({
-        data: {
-          id: input.id,
-          firstName: input.name,
-        },
-      });
-    } catch (error) {
-      console.error(error);
-
-      throw new Error("Internal Server Error");
-    }
-  }),
-
-  addMeetingToDB: publicProcedure.input(z.object({ id: z.string(), title: z.string(), data: z.string() })).mutation(async ({ ctx, input }) => {
-    try {
-      return prisma.meeting.create({ data: { ...input } });
-    } catch (error) {
-      console.error(error);
-
-      throw new Error("Internal Server Error");
-    }
+  addMeetingToDB: publicProcedure.input(z.object({ id: z.string(), data: z.string() })).mutation(async ({ ctx, input }) => {
+    const { id, data } = input;
+    return prisma.meeting.create({ data: { id, data } });
   }),
 });
 
@@ -152,13 +108,13 @@ export type AppRouter = typeof appRouter;
 export const trpc = awsLambdaRequestHandler({
   router: appRouter,
   createContext,
-
-  responseMeta: ({ ctx, data }) => {
+  responseMeta: () => {
     return {
       headers: {
         "Access-Control-Allow-Headers": "Content-Type",
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
+        "Access-Control-Allow-Credentials": "true",
       },
     };
   },

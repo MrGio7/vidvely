@@ -8,15 +8,15 @@ interface CreateChimeMeetingInput {
 
 interface JoinChimeMeetingInput {
   meetingId: string;
-  name: string;
+  userId: string;
 }
 
 const chime = new ChimeClient({ region: "eu-central-1" });
 
-export const createChimeMeeting = async ({ name, title }: CreateChimeMeetingInput) => {
+export const createChimeMeeting = async () => {
   const createMeetingCommand = new CreateMeetingCommand({
     ClientRequestToken: uuidv4(),
-    ExternalMeetingId: title.substring(0, 64),
+    ExternalMeetingId: uuidv4(),
   });
 
   console.info("Creating new meeting");
@@ -38,12 +38,12 @@ export const createChimeMeeting = async ({ name, title }: CreateChimeMeetingInpu
   };
 };
 
-export const joinChimeMeeting = async ({ meetingId, name }: JoinChimeMeetingInput) => {
+export const joinChimeMeeting = async ({ meetingId, userId }: JoinChimeMeetingInput) => {
   console.info("Adding new attendee");
 
   const createAttendeeCommand = new CreateAttendeeCommand({
     MeetingId: meetingId,
-    ExternalUserId: `${uuidv4()}#${name}`.substring(0, 64),
+    ExternalUserId: userId,
   });
 
   const attendeeInfo = await chime.send(createAttendeeCommand);
@@ -59,6 +59,4 @@ export const endChimeMeeting = async (meetingId: string) => {
   await chime.send(deleteMeetingCommand);
 
   console.info("Deleted Meeting: " + meetingId);
-
-  return true;
 };
