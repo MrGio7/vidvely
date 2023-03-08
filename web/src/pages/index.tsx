@@ -9,7 +9,7 @@ export default function MeetingPage() {
   const { user } = useContext(AppContext);
 
   function logoutHandler() {
-    fetch("http://localhost:3000/logout", {
+    fetch(`${import.meta.env.VITE_API_URL}/logout`, {
       method: "POST",
       credentials: "include",
     }).then((res) => {

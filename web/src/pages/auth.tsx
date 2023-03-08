@@ -20,7 +20,7 @@ const Auth: React.FC<AuthProps> = () => {
     },
     onError: (error) => {
       if (error.data?.code === "UNAUTHORIZED") {
-        fetch("http://localhost:3000", {
+        fetch(import.meta.env.VITE_API_URL, {
           method: "POST",
           body: authCode,
           credentials: "include",
