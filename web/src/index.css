@@ -15,3 +15,11 @@ body {
 .ch-nameplate {
   display: none;
 }
+
+.egdEPf svg {
+  color: whitesmoke;
+}
+
+.ch-control-bar-item-label {
+  color: whitesmoke !important
+}

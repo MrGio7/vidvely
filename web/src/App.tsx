@@ -1,33 +1,48 @@
-import { useState } from "react";
+import { createContext, useState } from "react";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { trpc, trpcConfig } from "./utils/trpc";
 
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Root from "./pages";
 
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { parseCookies, setCookie } from "nookies";
 import Auth from "./pages/auth";
+import { LoadingSVG } from "./assets/SVG";
+
+interface AppContextPayload {
+  user?: User;
+  setUser: React.Dispatch<React.SetStateAction<User | undefined>>;
+}
+
+interface User {
+  id: string;
+  email: string;
+}
+
+export const AppContext = createContext<AppContextPayload>({
+  setUser: () => {},
+});
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Root />,
   },
-  {
-    path: "/auth",
-    element: <Auth />,
-  },
 ]);
 
 export function App() {
   const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() => trpc.createClient(trpcConfig));
+  const [user, setUser] = useState<User>();
 
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
+        <AppContext.Provider value={{ user, setUser }}>
+          <Auth />
+          {!user && <LoadingSVG className="absolute w-32 h-32 top-[calc(50%-4rem)] left-[calc(50%-4rem)]" />}
+          {!!user && <RouterProvider router={router} />}
+        </AppContext.Provider>
       </QueryClientProvider>
     </trpc.Provider>
   );

@@ -1,53 +1,48 @@
-import React, { ChangeEvent, FC, FormEvent, useState } from "react";
+import React, { ChangeEvent, FC, FormEvent, useContext, useState } from "react";
 
-import { Flex, FormField, Input, PrimaryButton, useMeetingManager } from "amazon-chime-sdk-component-library-react";
+import { Flex, FormField, Input, PrimaryButton, useMeetingManager, useMeetingStatus } from "amazon-chime-sdk-component-library-react";
 import { trpcProxy, trpc } from "../utils/trpc";
 import { MeetingSessionConfiguration } from "amazon-chime-sdk-js";
 import { redirect } from "react-router-dom";
+import { AppContext } from "../App";
+import { ArrowSVG } from "../assets/SVG";
 
 const MeetingForm: FC = () => {
   const meetingManager = useMeetingManager();
-  const [meetingTitle, setMeetingTitle] = useState("");
-  const [attendeeName, setName] = useState("");
+  const [meetingId, setMeetingId] = useState("");
+  const [isMeetingIdInputHidden, setIsMeetingIdInputHidden] = useState(true);
 
   function getAttendeeCallback() {
     return async (chimeAttendeeId: string, externalUserId?: string) => {
-      const attendeeInfo = await trpcProxy.getUserFromDB.query({ userId: chimeAttendeeId });
+      const { firstName, lastName, email } = await trpcProxy.userInfo.query();
 
       return {
-        name: attendeeInfo?.firstName || "" + " " + attendeeInfo?.lastName || "",
+        name: firstName ? firstName + " " + lastName : email,
       };
     };
   }
 
-  const clickedJoinMeeting = async (event: FormEvent) => {
+  const joinMeetingHandler = async (event: FormEvent) => {
     event.preventDefault();
 
-    meetingManager.getAttendee = getAttendeeCallback();
-    const title = meetingTitle.trim().toLocaleLowerCase();
-    const name = attendeeName.trim();
+    if (!!isMeetingIdInputHidden) {
+      setIsMeetingIdInputHidden(false);
 
-    const meeting = await trpcProxy.getMeetingFromDB.query({ title });
+      return;
+    }
+
+    meetingManager.getAttendee = getAttendeeCallback();
+
+    const meeting = await trpcProxy.getMeeting.query({ meetingId });
+
+    if (!meeting) return;
 
     try {
-      if (!!meeting) {
-        const joinInfo = await trpcProxy.joinMeeting.mutate({ meetingId: meeting.id, name });
+      const joinInfo = await trpcProxy.joinMeeting.mutate({ meetingId: meeting.id });
 
-        await trpcProxy.addUserToDB.mutate({ id: joinInfo.Attendee?.AttendeeId!, name });
+      const meetingSessionConfiguration = new MeetingSessionConfiguration(JSON.parse(meeting.data), joinInfo.Attendee);
 
-        const meetingSessionConfiguration = new MeetingSessionConfiguration(JSON.parse(meeting.data!), joinInfo.Attendee);
-
-        await meetingManager.join(meetingSessionConfiguration);
-      } else {
-        const joinInfo = await trpcProxy.createMeeting.mutate({ title, name });
-
-        await trpcProxy.addMeetingToDB.mutate({ title, id: joinInfo?.Meeting?.MeetingId!, data: JSON.stringify(joinInfo.Meeting) });
-        await trpcProxy.addUserToDB.mutate({ id: joinInfo.Attendee?.AttendeeId!, name });
-
-        const meetingSessionConfiguration = new MeetingSessionConfiguration(joinInfo.Meeting, joinInfo.Attendee);
-
-        await meetingManager.join(meetingSessionConfiguration);
-      }
+      await meetingManager.join(meetingSessionConfiguration);
     } catch (error) {
       console.log(error);
     }
@@ -56,35 +51,53 @@ const MeetingForm: FC = () => {
     await meetingManager.start();
   };
 
+  const createMeetingHandler = async (event: FormEvent) => {
+    event.preventDefault();
+    try {
+      const joinInfo = await trpcProxy.createMeeting.mutate();
+
+      const meetingSessionConfiguration = new MeetingSessionConfiguration(joinInfo.Meeting, joinInfo.Attendee);
+
+      await meetingManager.join(meetingSessionConfiguration);
+    } catch (error) {
+      console.error(error);
+    }
+
+    await meetingManager.start();
+  };
+
+  function backButtonHandler(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+    event.preventDefault();
+    setIsMeetingIdInputHidden(true);
+  }
+
   return (
-    <form className="w-5/6">
-      <FormField
-        field={Input}
-        label="Meeting Id"
-        value={meetingTitle}
-        fieldProps={{
-          name: "Meeting Id",
-          placeholder: "Enter a Meeting ID",
-        }}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => {
-          setMeetingTitle(e.target.value);
-        }}
-      />
-      <FormField
-        field={Input}
-        label="Name"
-        value={attendeeName}
-        fieldProps={{
-          name: "Name",
-          placeholder: "Enter your Attendee Name",
-        }}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => {
-          setName(e.target.value);
-        }}
-      />
-      <Flex container justifyContent="center" className="w-full mt-10">
-        <PrimaryButton label="Join Meeting" onClick={clickedJoinMeeting} />
-      </Flex>
+    <form className="w-5/6 flex flex-col items-center gap-y-5">
+      {!isMeetingIdInputHidden && (
+        <>
+          <button className="w-48 m-0 p-0 text-2xl text-indigo-700 hover:text-indigo-800 font-bold" onClick={backButtonHandler}>
+            <ArrowSVG className="h-8 w-8" />
+          </button>
+          <FormField
+            field={Input}
+            label=""
+            value={meetingId}
+            fieldProps={{
+              name: "Meeting Id",
+              placeholder: "Enter a Meeting ID",
+            }}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              setMeetingId(e.target.value);
+            }}
+            className="!mb-0"
+            layout="input-only"
+          />
+        </>
+      )}
+
+      <PrimaryButton className="w-48 !bg-indigo-700 !border-indigo-800 hover:!bg-indigo-800" label="Join Meeting" onClick={joinMeetingHandler} />
+
+      {isMeetingIdInputHidden && <PrimaryButton className="w-48 !bg-indigo-700 !border-indigo-800 hover:!bg-indigo-800" label="Create Meeting" onClick={createMeetingHandler} />}
     </form>
   );
 };

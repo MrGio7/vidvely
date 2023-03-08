@@ -6,6 +6,7 @@ import { createChimeMeeting, endChimeMeeting, joinChimeMeeting } from "../chime"
 // @ts-ignore
 import { prisma } from "/opt/client";
 import { CognitoJwtVerifier } from "aws-jwt-verify";
+import { Meeting, User } from "@prisma/client";
 
 async function getUserId(access_token: string) {
   const verifier = CognitoJwtVerifier.create({
@@ -13,12 +14,13 @@ async function getUserId(access_token: string) {
     tokenUse: "access",
     clientId: "3cermrrihd00fn1742frogg4ip",
   });
-
   try {
     const payload = await verifier.verify(access_token);
 
     return payload.sub;
-  } catch {
+  } catch (err) {
+    console.error(err);
+
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 }
@@ -46,7 +48,7 @@ const appRouter = router({
   createMeeting: publicProcedure.mutation(async ({ ctx, input }) => {
     const { userId } = ctx;
 
-    const meetingInfo = await createChimeMeeting();
+    const meetingInfo = await createChimeMeeting({ userId });
 
     if (!meetingInfo.Meeting) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: "meeting id is not defined" });
 
@@ -88,18 +90,23 @@ const appRouter = router({
   }),
 
   userInfo: publicProcedure.query(async ({ ctx }) => {
-    return prisma.user.findUnique({ where: { id: ctx.userId } });
+    try {
+      const user: User = await prisma.user.findUniqueOrThrow({ where: { id: ctx.userId } });
+
+      return user;
+    } catch (error) {
+      console.error(error);
+
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+    }
   }),
 
   getMeeting: publicProcedure.input(z.object({ meetingId: z.string().uuid() })).query(async ({ ctx, input }) => {
     const { meetingId } = input;
 
-    return prisma.meeting.findUnique({ where: { id: meetingId } });
-  }),
+    const meeting: Meeting | null = await prisma.meeting.findUnique({ where: { id: meetingId } });
 
-  addMeetingToDB: publicProcedure.input(z.object({ id: z.string(), data: z.string() })).mutation(async ({ ctx, input }) => {
-    const { id, data } = input;
-    return prisma.meeting.create({ data: { id, data } });
+    return meeting;
   }),
 });
 

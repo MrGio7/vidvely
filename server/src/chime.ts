@@ -13,7 +13,7 @@ interface JoinChimeMeetingInput {
 
 const chime = new ChimeClient({ region: "eu-central-1" });
 
-export const createChimeMeeting = async () => {
+export const createChimeMeeting = async ({ userId }: { userId: string }) => {
   const createMeetingCommand = new CreateMeetingCommand({
     ClientRequestToken: uuidv4(),
     ExternalMeetingId: uuidv4(),
@@ -27,7 +27,7 @@ export const createChimeMeeting = async () => {
 
   const createAttendeeCommand = new CreateAttendeeCommand({
     MeetingId: meetingInfo.Meeting?.MeetingId,
-    ExternalUserId: `${uuidv4()}#${name}`.substring(0, 64),
+    ExternalUserId: userId,
   });
 
   const attendeeInfo = await chime.send(createAttendeeCommand);

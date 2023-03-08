@@ -45,7 +45,7 @@ const serverlessConfiguration: AWS = {
     },
     auth: {
       handler: "src/handlers.auth",
-      events: [{ httpApi: "OPTIONS /" }, { httpApi: "POST /" }],
+      events: [{ httpApi: "OPTIONS /" }, { httpApi: "POST /" }, { httpApi: "POST /logout" }],
       layers: [{ Ref: "PrismaLambdaLayer" }],
     },
   },
