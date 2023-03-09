@@ -8,17 +8,21 @@ const serverlessConfiguration: AWS = {
   frameworkVersion: "3",
   provider: {
     name: "aws",
-    runtime: "nodejs14.x",
+    runtime: "nodejs16.x",
     region: "eu-central-1",
     profile: "MrGio7",
     httpApi: {
       cors: {
         allowCredentials: true,
-        allowedOrigins: ["https://vidvely.vercel.app"],
+        allowedOrigins: ["https://vidvely.vercel.app", "http://localhost:5173"],
+        allowedHeaders: ["authorization", "content-type"],
+        allowedMethods: ["OPTIONS", "GET", "POST"],
+        exposedResponseHeaders: ["*", "authorization"],
+        maxAge: 3600,
       },
     },
     environment: {
-      DATABASE_URL: process.env.DATABASE_URL!,
+      CLIENT_URL: process.env.CLIENT_URL!,
     },
   },
 
@@ -48,7 +52,7 @@ const serverlessConfiguration: AWS = {
     },
     auth: {
       handler: "src/handlers.auth",
-      events: [{ httpApi: "OPTIONS /" }, { httpApi: "POST /" }, { httpApi: "POST /logout" }],
+      events: [{ httpApi: "OPTIONS /" }, { httpApi: "POST /" }, { httpApi: "OPTIONS /logout" }, { httpApi: "POST /logout" }],
       layers: [{ Ref: "PrismaLambdaLayer" }],
     },
   },

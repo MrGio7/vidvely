@@ -1,12 +1,14 @@
 import { TRPCError, inferAsyncReturnType, initTRPC } from "@trpc/server";
 import { CreateAWSLambdaContextOptions, awsLambdaRequestHandler } from "@trpc/server/adapters/aws-lambda";
-import { APIGatewayProxyEventV2 } from "aws-lambda";
+import { APIGatewayProxyEventV2, APIGatewayProxyResult } from "aws-lambda";
 import { z } from "zod";
 import { createChimeMeeting, endChimeMeeting, joinChimeMeeting } from "../chime";
 // @ts-ignore
 import { prisma } from "/opt/client";
 import { CognitoJwtVerifier } from "aws-jwt-verify";
 import { Meeting, User } from "@prisma/client";
+import middy from "@middy/core";
+import cors from "@middy/http-cors";
 
 async function getUserId(access_token: string) {
   const verifier = CognitoJwtVerifier.create({
@@ -34,6 +36,7 @@ async function createContext({ event, context }: CreateAWSLambdaContextOptions<A
 
   return {
     userId,
+    httpMethod: event.requestContext.http.method,
   };
 }
 
@@ -112,17 +115,38 @@ const appRouter = router({
 
 export type AppRouter = typeof appRouter;
 
-export const trpc = awsLambdaRequestHandler({
-  router: appRouter,
-  createContext,
-  responseMeta: () => {
-    return {
-      headers: {
-        "Access-Control-Allow-Headers": "Authorization,Content-Type,x-amz-date,x-api-key,x-amz-security-token,x-amz-user-agent,x-amzn-trace-id",
-        "Access-Control-Allow-Origin": "https://vidvely.vercel.app",
-        "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
-        "Access-Control-Allow-Credentials": "true",
-      },
-    };
-  },
-});
+const setOptionsResMiddleware = (): middy.MiddlewareObj<APIGatewayProxyEventV2, APIGatewayProxyResult> => {
+  const before: middy.MiddlewareFn<APIGatewayProxyEventV2, APIGatewayProxyResult> = async (request): Promise<void> => {
+    // Your middleware logic
+  };
+
+  const after: middy.MiddlewareFn<APIGatewayProxyEventV2, APIGatewayProxyResult> = async (request): Promise<APIGatewayProxyResult | void> => {
+    if (request.event.requestContext.http.method === "OPTIONS")
+      return {
+        statusCode: 200,
+        body: "",
+      };
+  };
+
+  return {
+    before,
+    after,
+  };
+};
+
+export const trpc = middy()
+  .handler(
+    awsLambdaRequestHandler({
+      router: appRouter,
+      createContext,
+    })
+  )
+  .use(setOptionsResMiddleware())
+  .use(
+    cors({
+      credentials: true,
+      headers: "Authorization,Content-Type,x-amz-date,x-api-key,x-amz-security-token,x-amz-user-agent,x-amzn-trace-id",
+      methods: "OPTIONS,POST,GET",
+      origins: ["https://vidvely.vercel.app", "http://localhost:5173"],
+    })
+  );

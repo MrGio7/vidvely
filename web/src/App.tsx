@@ -28,6 +28,10 @@ const router = createBrowserRouter([
     path: "/",
     element: <Root />,
   },
+  {
+    path: "/AUTH",
+    element: <></>,
+  },
 ]);
 
 export function App() {

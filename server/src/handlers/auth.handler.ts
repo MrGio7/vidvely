@@ -85,6 +85,8 @@ async function refreshTokenHandler(refresh_token: string) {
 }
 
 export const auth = async (event: APIGatewayProxyEventV2, context: Context): Promise<APIGatewayProxyStructuredResultV2> => {
+  if (event.requestContext.http.method === "OPTIONS") return { statusCode: 200, body: "" };
+
   const refresh_token = event.cookies?.find((cookie) => cookie.startsWith("refresh_token"))?.substring(14);
   const authCode = event.body;
 

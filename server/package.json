@@ -16,6 +16,8 @@
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-chime": "^3.282.0",
+    "@middy/core": "^4.2.6",
+    "@middy/http-cors": "^4.2.6",
     "@prisma/client": "^4.11.0",
     "@trpc/server": "^10.14.0",
     "aws-jwt-verify": "^3.4.0",
