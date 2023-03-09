@@ -12,7 +12,10 @@ const serverlessConfiguration: AWS = {
     region: "eu-central-1",
     profile: "MrGio7",
     httpApi: {
-      cors: true,
+      cors: {
+        allowCredentials: true,
+        allowedOrigins: ["https://vidvely.vercel.app"],
+      },
     },
     environment: {
       DATABASE_URL: process.env.DATABASE_URL!,

@@ -118,8 +118,8 @@ export const trpc = awsLambdaRequestHandler({
   responseMeta: () => {
     return {
       headers: {
-        "Access-Control-Allow-Headers": "Content-Type",
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "Authorization,Content-Type,x-amz-date,x-api-key,x-amz-security-token,x-amz-user-agent,x-amzn-trace-id",
+        "Access-Control-Allow-Origin": "https://vidvely.vercel.app",
         "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
         "Access-Control-Allow-Credentials": "true",
       },
