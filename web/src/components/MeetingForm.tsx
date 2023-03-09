@@ -3,7 +3,6 @@ import React, { ChangeEvent, FC, FormEvent, useContext, useState } from "react";
 import { Flex, FormField, Input, PrimaryButton, useMeetingManager, useMeetingStatus } from "amazon-chime-sdk-component-library-react";
 import { trpcProxy, trpc } from "../utils/trpc";
 import { MeetingSessionConfiguration } from "amazon-chime-sdk-js";
-import { redirect } from "react-router-dom";
 import { AppContext } from "../App";
 import { ArrowSVG } from "../assets/SVG";
 
