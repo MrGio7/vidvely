@@ -3,7 +3,6 @@ import { createContext, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { trpc, trpcConfig } from "./utils/trpc";
 
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Root from "./pages";
 
 import Auth from "./pages/auth";
@@ -23,17 +22,6 @@ export const AppContext = createContext<AppContextPayload>({
   setUser: () => {},
 });
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Root />,
-  },
-  {
-    path: "/auth",
-    element: <></>,
-  },
-]);
-
 export function App() {
   const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() => trpc.createClient(trpcConfig));
@@ -45,7 +33,7 @@ export function App() {
         <AppContext.Provider value={{ user, setUser }}>
           <Auth />
           {!user && <LoadingSVG className="absolute w-32 h-32 top-[calc(50%-4rem)] left-[calc(50%-4rem)]" />}
-          {!!user && <RouterProvider router={router} />}
+          {!!user && <Root />}
         </AppContext.Provider>
       </QueryClientProvider>
     </trpc.Provider>

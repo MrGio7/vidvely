@@ -1,5 +1,4 @@
 import React, { useContext, useEffect } from "react";
-import { redirect } from "react-router-dom";
 import { AppContext } from "../App";
 import { trpc } from "../utils/trpc";
 
@@ -30,7 +29,7 @@ const Auth: React.FC<AuthProps> = () => {
               window.location.replace(
                 `https://vidvaley-dev.auth.eu-central-1.amazoncognito.com/oauth2/authorize?client_id=3cermrrihd00fn1742frogg4ip&response_type=code&scope=email+openid+phone&redirect_uri=${
                   new URL(import.meta.url).origin
-                }/auth/`
+                }`
               );
 
             if (res.status === 200) {

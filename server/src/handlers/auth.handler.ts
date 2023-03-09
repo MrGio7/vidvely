@@ -16,6 +16,7 @@ function response(input: APIGatewayProxyStructuredResultV2) {
     ...input,
     headers: {
       "Access-Control-Allow-Headers": "Authorization,Content-Type,x-amz-date,x-api-key,x-amz-security-token,x-amz-user-agent,x-amzn-trace-id",
+      // "Access-Control-Allow-Origin": "http://localhost:5173",
       "Access-Control-Allow-Origin": "https://vidvely.vercel.app",
       "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
       "Access-Control-Allow-Credentials": "true",
@@ -32,7 +33,7 @@ async function authCodeHandler(authCode: string) {
         grant_type: "authorization_code",
         client_id: "3cermrrihd00fn1742frogg4ip",
         code: authCode,
-        redirect_uri: `${process.env.CLIENT_URL}/auth/`,
+        redirect_uri: `${process.env.CLIENT_URL}`,
       },
       { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     )
