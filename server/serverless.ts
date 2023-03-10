@@ -22,8 +22,8 @@ const serverlessConfiguration: AWS = {
       },
     },
     environment: {
-      CLIENT_URL: process.env.CLIENT_URL!,
-      DATABASE_URL: process.env.DATABASE_URL!,
+      CLIENT_URL: "${env:CLIENT_URL}",
+      DATABASE_URL: "${env:DATABASE_URL}",
     },
   },
 
@@ -31,6 +31,8 @@ const serverlessConfiguration: AWS = {
     "serverless-esbuild", //
     "serverless-offline",
   ],
+
+  useDotenv: true,
 
   custom: {
     esbuild: {
@@ -50,6 +52,7 @@ const serverlessConfiguration: AWS = {
       handler: "src/handlers.trpc",
       events: [{ httpApi: "OPTIONS /{proxy+}" }, { httpApi: "*" }],
       layers: [{ Ref: "PrismaLambdaLayer" }],
+      environment: {},
     },
     auth: {
       handler: "src/handlers.auth",

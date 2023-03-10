@@ -25,7 +25,7 @@ const Auth: React.FC<AuthProps> = () => {
           credentials: "include",
         })
           .then((res) => {
-            if (res.status === 401)
+            if (res.status === 400 && !authCode)
               window.location.replace(
                 `https://vidvaley-dev.auth.eu-central-1.amazoncognito.com/oauth2/authorize?client_id=3cermrrihd00fn1742frogg4ip&response_type=code&scope=email+openid+phone&redirect_uri=${
                   new URL(import.meta.url).origin

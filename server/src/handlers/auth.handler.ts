@@ -80,7 +80,7 @@ async function refreshTokenHandler(refresh_token: string) {
     .then((res) => res.data)
     .catch((error) => console.error(error));
 
-  if (!authData?.access_token) return response({ statusCode: 401 });
+  if (!authData?.access_token) return response({ statusCode: 500 });
 
   return response({ statusCode: 200, body: "Bearer " + authData.access_token, cookies: [`access_token=${authData.access_token}; HttpOnly; Secure; SameSite=Strict; Max-Age=${60 * 60}`] });
 }
@@ -93,8 +93,14 @@ export const auth = async (event: APIGatewayProxyEventV2, context: Context): Pro
 
   if (event.rawPath === "/logout") return response({ statusCode: 200, cookies: ["access_token=0; maxAge:0", "refresh_token=0; maxAge:0"] });
 
-  if (!refresh_token && !authCode) return response({ statusCode: 401 });
+  if (!refresh_token && !authCode) {
+    console.error({
+      refresh_token,
+      authCode,
+    });
 
+    return response({ statusCode: 400 });
+  }
   if (!!authCode) return authCodeHandler(authCode);
 
   if (!!refresh_token) return refreshTokenHandler(refresh_token);
