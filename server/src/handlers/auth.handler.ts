@@ -60,8 +60,8 @@ async function authCodeHandler(authCode: string) {
     statusCode: 200,
     body: "Bearer " + authData.access_token,
     cookies: [
-      `access_token=${authData.access_token}; HttpOnly; Secure; SameSite=Strict; Max-Age=${60 * 60}`,
-      `refresh_token=${authData.refresh_token}; HttpOnly; Secure; SameSite=Strict; Max-Age=${60 * 60 * 24 * 30}`,
+      `access_token=${authData.access_token}; HttpOnly; Secure; SameSite=None; Max-Age=${60 * 60}`,
+      `refresh_token=${authData.refresh_token}; HttpOnly; Secure; SameSite=None; Max-Age=${60 * 60 * 24 * 30}`,
     ],
   });
 }
@@ -82,16 +82,16 @@ async function refreshTokenHandler(refresh_token: string) {
 
   if (!authData?.access_token) return response({ statusCode: 500 });
 
-  return response({ statusCode: 200, body: "Bearer " + authData.access_token, cookies: [`access_token=${authData.access_token}; HttpOnly; Secure; SameSite=Strict; Max-Age=${60 * 60}`] });
+  return response({ statusCode: 200, body: "Bearer " + authData.access_token, cookies: [`access_token=${authData.access_token}; HttpOnly; Secure; SameSite=None; Max-Age=${60 * 60}`] });
 }
 
 export const auth = async (event: APIGatewayProxyEventV2, context: Context): Promise<APIGatewayProxyStructuredResultV2> => {
-  if (event.requestContext.http.method === "OPTIONS") return { statusCode: 200, body: "" };
+  if (event.requestContext.http.method === "OPTIONS") return response({ statusCode: 200, body: "" });
 
   const refresh_token = event.cookies?.find((cookie) => cookie.startsWith("refresh_token"))?.substring(14);
   const authCode = event.body;
 
-  if (event.rawPath === "/logout") return response({ statusCode: 200, cookies: ["access_token=0; maxAge:0", "refresh_token=0; maxAge:0"] });
+  if (event.rawPath === "/logout") return response({ statusCode: 200, cookies: ["access_token=0; Max-Age:0", "refresh_token=0; Max-Age:0"] });
 
   if (!refresh_token && !authCode) {
     console.error({
