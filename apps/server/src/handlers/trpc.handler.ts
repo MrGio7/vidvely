@@ -6,7 +6,6 @@ import { createChimeMeeting, endChimeMeeting, joinChimeMeeting } from "../chime"
 // @ts-ignore
 import { prisma } from "/opt/client";
 import { CognitoJwtVerifier } from "aws-jwt-verify";
-import { Meeting, User } from "@prisma/client";
 import middy from "@middy/core";
 import cors from "@middy/http-cors";
 
@@ -104,7 +103,7 @@ const appRouter = router({
   getMeeting: publicProcedure.input(z.object({ meetingId: z.string().uuid() })).query(async ({ ctx, input }) => {
     const { meetingId } = input;
 
-    const meeting: Meeting | null = await prisma.meeting.findUnique({ where: { id: meetingId } });
+    const meeting = await prisma.meeting.findUnique({ where: { id: meetingId } });
 
     return meeting;
   }),
