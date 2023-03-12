@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #264653;
+}
+
+.eCLgYE {
+  height: max-content;
+}
+
+.ch-nameplate {
+  display: none;
+}
+
+.egdEPf svg {
+  color: whitesmoke;
+}
+
+.ch-control-bar-item-label {
+  color: whitesmoke !important
+}

@@ -1,0 +1,28 @@
+{
+  "name": "vidvely",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrGio7/vidvely.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MrGio7/vidvely/issues"
+  },
+  "homepage": "https://github.com/MrGio7/vidvely#readme",
+  "devDependencies": {
+    "@types/node": "^16.18.14",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.0.3",
+    "ts-node": "^10.9.1"
+  },
+  "workspaces": [
+    "apps/**"
+  ]
+}
