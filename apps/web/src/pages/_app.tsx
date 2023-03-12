@@ -18,6 +18,7 @@ import { ThemeProvider } from "styled-components";
 import { LoadingSVG } from "~/assets/SVG";
 import "~/styles/globals.css";
 import { trpc } from "~/utils/trpc";
+import { User } from "~/types/user";
 
 interface AppContext {
   user: User;
