@@ -22,7 +22,6 @@ const serverlessConfiguration: AWS = {
       },
     },
     environment: {
-      CLIENT_URL: "${env:CLIENT_URL}",
       DATABASE_URL: "${env:DATABASE_URL}",
     },
   },
