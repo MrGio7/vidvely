@@ -43,9 +43,37 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     async jwt({ token, account }) {
-      if (account) token.accessToken = account.access_token;
+      if (!account) return token;
 
-      return token;
+      token.accessToken = account.access_token;
+
+      const authData: { access_token: string; expires_at: number } | null =
+        await fetch(
+          "https://vidvaley-dev.auth.eu-central-1.amazoncognito.com/oauth2/token" +
+            new URLSearchParams({
+              grant_type: "refresh_token",
+              client_id: env.COGNITO_CLIENT_ID,
+              refresh_token: account.refresh_token!,
+            }),
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          }
+        ).then((res) => res.json());
+
+      if (!authData) throw authData;
+
+      // Return previous token if the access token has not expired yet
+      if (Date.now() < account.expires_at!) {
+        return token;
+      }
+
+      return {
+        ...token,
+        accessToken: authData.access_token,
+        accessTokenExpires: Date.now() + authData.expires_at * 1000,
+        refreshToken: account.refresh_token,
+      };
     },
     async session({ session, token }) {
       const user = await trpcProxy(
