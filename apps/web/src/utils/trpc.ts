@@ -26,7 +26,7 @@ export const trpc = (token: string) =>
              * If you want to use SSR, you need to use the server's full URL
              * @link https://trpc.io/docs/ssr
              **/
-            url: `http://localhost:4000`,
+            url: `https://fjkq0vwtad.execute-api.eu-central-1.amazonaws.com`,
             headers: () => {
               return {
                 Authorization: token,
@@ -54,7 +54,7 @@ export const trpcProxy = (token: string) =>
          * If you want to use SSR, you need to use the server's full URL
          * @link https://trpc.io/docs/ssr
          **/
-        url: `http://localhost:4000`,
+        url: `https://fjkq0vwtad.execute-api.eu-central-1.amazonaws.com`,
         headers: () => {
           return {
             Authorization: token,
