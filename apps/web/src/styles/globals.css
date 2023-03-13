@@ -10,9 +10,9 @@ body {
   height: max-content;
 }
 
-.ch-nameplate {
+/* .ch-nameplate {
   display: none;
-}
+} */
 
 .egdEPf svg {
   color: whitesmoke;
@@ -20,4 +20,16 @@ body {
 
 .ch-control-bar-item-label {
   color: whitesmoke !important
+}
+
+@media only screen and (max-width: 600px) {
+  .eYtRsl .ch-nameplate {
+    padding: 0.25rem !important;
+    left: 0.25rem !important;
+    bottom: 0.25rem !important;
+  }
+
+  .eYtRsl .ch-nameplate .ch-text {
+    font-size: 0.5rem !important;
+  }
 }

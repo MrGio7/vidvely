@@ -6,8 +6,8 @@ import {
 import { type GetServerSidePropsContext } from "next";
 import {
   getServerSession,
-  type NextAuthOptions,
   type DefaultSession,
+  type NextAuthOptions,
 } from "next-auth";
 import CognitoProvider from "next-auth/providers/cognito";
 import { env } from "~/env.mjs";
@@ -47,11 +47,15 @@ export const authOptions: NextAuthOptions = {
   theme: { colorScheme: "dark" },
 
   callbacks: {
-    async jwt({ token, account }) {
+    async jwt({ token, account, user, profile }) {
       if (!account) return token;
 
       if (Date.now() < account.expires_at! * 1000) {
         token.accessToken = account.access_token;
+
+        user = await trpcProxy(account.access_token!).findOrCreateUser.mutate({
+          email: profile?.email,
+        });
 
         return token;
       }
@@ -86,13 +90,11 @@ export const authOptions: NextAuthOptions = {
         refreshToken: account.refresh_token,
       };
     },
-    async session({ session, token }) {
-      const user = await trpcProxy(
+    async session({ session, token, user }) {
+      session.token = token.accessToken as string;
+      session.user = await trpcProxy(
         token.accessToken as string
       ).findOrCreateUser.mutate({});
-
-      session.token = token.accessToken as string;
-      session.user = user;
 
       return session;
     },

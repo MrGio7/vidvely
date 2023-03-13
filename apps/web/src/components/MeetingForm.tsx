@@ -1,43 +1,34 @@
-import React, { ChangeEvent, FC, FormEvent, useContext, useState } from "react";
+import React, {
+  ChangeEvent,
+  Dispatch,
+  FC,
+  FormEvent,
+  SetStateAction,
+  useState,
+} from "react";
 
 import {
-  Flex,
   FormField,
   Input,
   PrimaryButton,
   useMeetingManager,
-  useMeetingStatus,
 } from "amazon-chime-sdk-component-library-react";
-import { trpcProxy, trpc } from "../utils/trpc";
 import { MeetingSessionConfiguration } from "amazon-chime-sdk-js";
+import { useSession } from "next-auth/react";
 import { ArrowSVG } from "../assets/SVG";
-import { signIn, useSession } from "next-auth/react";
+import { trpcProxy } from "../utils/trpc";
 
-const MeetingForm: FC = () => {
+interface MeetingFormProps {
+  setLoading: Dispatch<SetStateAction<boolean>>;
+}
+
+const MeetingForm: FC<MeetingFormProps> = ({ setLoading }) => {
   const meetingManager = useMeetingManager();
   const [meetingId, setMeetingId] = useState("");
   const [isMeetingIdInputHidden, setIsMeetingIdInputHidden] = useState(true);
-  const session = useSession({
-    required: true,
-    onUnauthenticated: () => signIn("cognito"),
-  });
-
-  if (session.status === "loading") return <h1>loading...</h1>;
-  if (session.status !== "authenticated") return <h1>unauthenticated</h1>;
-
-  const token = session.data.token;
-
-  function getAttendeeCallback() {
-    return async (chimeAttendeeId: string, externalUserId?: string) => {
-      const { firstName, lastName, email } = await trpcProxy(
-        token
-      ).findOrCreateUser.mutate({});
-
-      return {
-        name: firstName ? firstName + " " + lastName : email,
-      };
-    };
-  }
+  const session = useSession();
+  const token = session.data?.token!;
+  const user = session.data?.user!;
 
   const joinMeetingHandler = async (event: FormEvent) => {
     event.preventDefault();
@@ -48,7 +39,16 @@ const MeetingForm: FC = () => {
       return;
     }
 
-    meetingManager.getAttendee = getAttendeeCallback();
+    setLoading(true);
+
+    meetingManager.getAttendee = async (
+      chimeAttendeeId: string,
+      externalUserId?: string
+    ) => ({
+      name: !!user.firstName
+        ? user.firstName + " " + user.lastName
+        : user.email,
+    });
 
     const meeting = await trpcProxy(token).getMeeting.query({ meetingId });
 
@@ -75,6 +75,9 @@ const MeetingForm: FC = () => {
 
   const createMeetingHandler = async (event: FormEvent) => {
     event.preventDefault();
+
+    setLoading(true);
+
     try {
       const joinInfo = await trpcProxy(token).createMeeting.mutate();
 

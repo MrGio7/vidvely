@@ -6,42 +6,18 @@ import {
   MeetingProvider,
   darkTheme,
 } from "amazon-chime-sdk-component-library-react";
-import {
-  Dispatch,
-  SetStateAction,
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { useState } from "react";
 import { ThemeProvider } from "styled-components";
 import { LoadingSVG } from "~/assets/SVG";
 import "~/styles/globals.css";
-import { trpc } from "~/utils/trpc";
 import { User } from "~/types/user";
-
-interface AppContext {
-  user: User;
-  setUser: Dispatch<SetStateAction<User>>;
-}
-
-export const AppContext = createContext<AppContext>({
-  user: {} as User,
-  setUser: () => {},
-});
+import { trpc } from "~/utils/trpc";
 
 const Auth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { setUser } = useContext(AppContext);
   const session = useSession({
     required: true,
     onUnauthenticated: () => signIn("cognito"),
   });
-
-  const user = session.data?.user;
-
-  useEffect(() => {
-    if (!!user) setUser(user);
-  }, [user]);
 
   if (session.status === "loading") return <LoadingSVG />;
 
@@ -59,11 +35,9 @@ const MyApp: AppType<{ session: Session | null }> = ({
       <ThemeProvider theme={darkTheme}>
         {/* @ts-ignore */}
         <MeetingProvider>
-          <AppContext.Provider value={{ user, setUser }}>
-            <Auth>
-              <Component {...pageProps} />
-            </Auth>
-          </AppContext.Provider>
+          <Auth>
+            <Component {...pageProps} />
+          </Auth>
         </MeetingProvider>
       </ThemeProvider>
     </SessionProvider>

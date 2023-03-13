@@ -3,20 +3,28 @@ import {
   useMeetingStatus,
 } from "amazon-chime-sdk-component-library-react";
 import { type NextPage } from "next";
-import { useContext } from "react";
+import { useEffect, useState } from "react";
+import { LoadingSVG } from "~/assets/SVG";
 import Meeting from "~/components/Meeting";
 import MeetingForm from "~/components/MeetingForm";
-import { AppContext } from "./_app";
 
 const Home: NextPage = () => {
-  const { user } = useContext(AppContext);
   const meetingStatus = useMeetingStatus();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (meetingStatus !== MeetingStatus.Loading) setLoading(false);
+  }, [meetingStatus]);
+
+  if (loading) return <LoadingSVG />;
 
   return (
     <>
-      <header>user: {user.email}</header>
+      {/* <header>user: {user.email}</header> */}
       <main className={`flex h-[100dvh] flex-col items-center justify-center`}>
-        {meetingStatus !== MeetingStatus.Succeeded && <MeetingForm />}
+        {meetingStatus !== MeetingStatus.Succeeded && (
+          <MeetingForm setLoading={setLoading} />
+        )}
         {meetingStatus === MeetingStatus.Succeeded && <Meeting />}
       </main>
     </>
