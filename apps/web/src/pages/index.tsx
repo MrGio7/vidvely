@@ -24,15 +24,22 @@ export const getServerSideProps: GetServerSideProps<{
   token: string;
   meeting: trpcOutput["getMeeting"];
 }> = async (ctx) => {
-  const { token, user } = (await getServerAuthSession(ctx))!;
+  const session = await getServerAuthSession(ctx);
   const meetingId = ctx.query.meetingId as string | undefined;
+
+  if (!session)
+    return {
+      redirect: {
+        destination: "/auth/login",
+        permanent: false,
+      },
+    };
+
+  const { token, user } = session;
 
   const meeting = !!meetingId
     ? await trpcProxy(token).getMeeting.query({ meetingId })
     : null;
-
-  // console.log(meetingId);
-  // console.log(ctx.query);
 
   return {
     props: {
