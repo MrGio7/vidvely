@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import { FC } from "react";
 
 import {
   AudioInputControl,
@@ -6,28 +6,19 @@ import {
   ControlBar,
   ControlBarButton,
   Phone,
-  useMeetingManager,
-  MeetingStatus,
-  useMeetingStatus,
   VideoInputControl,
   VideoTileGrid,
+  useMeetingManager,
 } from "amazon-chime-sdk-component-library-react";
-import { trpc, trpcProxy } from "../utils/trpc";
 import { CopySVG } from "../assets/SVG";
-import { useSession } from "next-auth/react";
 
 const Meeting: FC = () => {
   const meetingManager = useMeetingManager();
-  const meetingStatus = useMeetingStatus();
-  const session = useSession();
-
-  if (session.status === "loading") return <h1>loading...</h1>;
-  if (session.status !== "authenticated") return <h1>unauthenticated</h1>;
 
   const clickedEndMeeting = async () => {
     const meetingId = meetingManager.meetingId;
     if (meetingId) {
-      await trpcProxy(session.data.token).endMeeting.mutate({ meetingId });
+      // await trpcProxy(session.data!.token).endMeeting.mutate({ meetingId });
       await meetingManager.leave();
     }
   };
@@ -38,7 +29,7 @@ const Meeting: FC = () => {
       <button
         className="absolute top-5 left-5 text-[whitesmoke] focus:text-green-500"
         onClick={() =>
-          navigator.clipboard.writeText(meetingManager.meetingId || "")
+          navigator.clipboard.writeText(window.location.href.toString())
         }
       >
         <CopySVG />

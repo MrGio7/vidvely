@@ -23,12 +23,7 @@ interface MeetingFormProps {
 }
 
 const MeetingForm: FC<MeetingFormProps> = ({ setLoading }) => {
-  const meetingManager = useMeetingManager();
-  const [meetingId, setMeetingId] = useState("");
   const [isMeetingIdInputHidden, setIsMeetingIdInputHidden] = useState(true);
-  const session = useSession();
-  const token = session.data?.token!;
-  const user = session.data?.user!;
 
   const joinMeetingHandler = async (event: FormEvent) => {
     event.preventDefault();

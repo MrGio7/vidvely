@@ -1,5 +1,6 @@
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import { createTRPCNext } from "@trpc/next";
+import { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "@vidvely/server";
 
 function getBaseUrl() {
@@ -63,3 +64,6 @@ export const trpcProxy = (token: string) =>
       }),
     ],
   });
+
+export type trpcInput = inferRouterInputs<AppRouter>;
+export type trpcOutput = inferRouterOutputs<AppRouter>;
