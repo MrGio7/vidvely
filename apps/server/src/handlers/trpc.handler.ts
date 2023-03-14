@@ -100,6 +100,14 @@ const appRouter = router({
     return user;
   }),
 
+  getUserName: publicProcedure.input(z.object({ userId: z.string().uuid() })).query(async ({ ctx, input }) => {
+    const { userId } = input;
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+
+    return !!user?.firstName ? user.firstName + (!!user?.lastName ? " " + user.lastName : "") : user?.email ?? "Guest";
+  }),
+
   getMeeting: publicProcedure.input(z.object({ meetingId: z.string().uuid() })).query(async ({ ctx, input }) => {
     const { meetingId } = input;
 

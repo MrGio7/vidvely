@@ -63,9 +63,9 @@ const Home: NextPage<
       chimeAttendeeId: string,
       externalUserId?: string
     ) => ({
-      name: !!user.firstName
-        ? user.firstName + " " + user.lastName
-        : user.email,
+      name: await trpcProxy(token).getUserName.query({
+        userId: externalUserId || chimeAttendeeId,
+      }),
     });
 
     if (!meeting) return;
@@ -113,8 +113,6 @@ const Home: NextPage<
   };
 
   useEffect(() => {
-    console.log({ user, token });
-
     if (!meeting) createMeeting();
     if (!!meeting) joinMeeting();
   }, []);
