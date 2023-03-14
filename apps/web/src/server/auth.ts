@@ -107,10 +107,6 @@ export const authOptions: NextAuthOptions = {
       issuer: env.COGNITO_ISSUER,
     }),
   ],
-
-  pages: {
-    signIn: "/auth/signin",
-  },
 };
 
 /**

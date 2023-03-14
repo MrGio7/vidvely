@@ -30,7 +30,8 @@ export const getServerSideProps: GetServerSideProps<{
   if (!session)
     return {
       redirect: {
-        destination: "/auth/login",
+        destination:
+          "/auth/signin" + (meetingId ? `?meetingId=${meetingId}` : ""),
         permanent: false,
       },
     };
