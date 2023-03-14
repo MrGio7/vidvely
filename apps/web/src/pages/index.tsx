@@ -90,6 +90,15 @@ const Home: NextPage<
   };
 
   const createMeeting = async () => {
+    meetingManager.getAttendee = async (
+      chimeAttendeeId: string,
+      externalUserId?: string
+    ) => ({
+      name: await trpcProxy(token).getUserName.query({
+        userId: externalUserId || chimeAttendeeId,
+      }),
+    });
+
     try {
       const joinInfo = await trpcProxy(token).createMeeting.mutate();
 
