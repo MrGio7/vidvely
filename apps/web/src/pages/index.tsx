@@ -1,17 +1,10 @@
-import {
-  MeetingStatus,
-  useMeetingManager,
-  useMeetingStatus,
-} from "amazon-chime-sdk-component-library-react";
+import { MeetingProvider, MeetingStatus, darkTheme, useMeetingManager, useMeetingStatus } from "amazon-chime-sdk-component-library-react";
 import { MeetingSessionConfiguration } from "amazon-chime-sdk-js";
-import {
-  GetServerSideProps,
-  InferGetServerSidePropsType,
-  type NextPage,
-} from "next";
+import { GetServerSideProps, InferGetServerSidePropsType, type NextPage } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+import { ThemeProvider } from "styled-components";
 import { LoadingSVG } from "~/assets/SVG";
 import Meeting from "~/components/Meeting";
 import { env } from "~/env.mjs";
@@ -30,17 +23,14 @@ export const getServerSideProps: GetServerSideProps<{
   if (!session)
     return {
       redirect: {
-        destination:
-          "/auth/signin" + (meetingId ? `?meetingId=${meetingId}` : ""),
+        destination: "/auth/signin" + (meetingId ? `?meetingId=${meetingId}` : ""),
         permanent: false,
       },
     };
 
   const { token, user } = session;
 
-  const meeting = !!meetingId
-    ? await trpcProxy(token).getMeeting.query({ meetingId })
-    : null;
+  const meeting = !!meetingId ? await trpcProxy(token).getMeeting.query({ meetingId }) : null;
 
   return {
     props: {
@@ -51,23 +41,20 @@ export const getServerSideProps: GetServerSideProps<{
   };
 };
 
-const Home: NextPage<
-  InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ user, token, meeting }) => {
+const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({ user, token, meeting }) => {
   const meetingManager = useMeetingManager();
   const meetingStatus = useMeetingStatus();
   const router = useRouter();
 
-  const joinMeeting = async () => {
-    meetingManager.getAttendee = async (
-      chimeAttendeeId: string,
-      externalUserId?: string
-    ) => ({
+  useEffect(() => {
+    meetingManager.getAttendee = async (chimeAttendeeId: string, externalUserId?: string) => ({
       name: await trpcProxy(token).getUserName.query({
         userId: externalUserId || chimeAttendeeId,
       }),
     });
+  }, []);
 
+  const joinMeeting = async () => {
     if (!meeting) return;
 
     try {
@@ -75,10 +62,7 @@ const Home: NextPage<
         meetingId: meeting.id,
       });
 
-      const meetingSessionConfiguration = new MeetingSessionConfiguration(
-        JSON.parse(meeting.data),
-        joinInfo.Attendee
-      );
+      const meetingSessionConfiguration = new MeetingSessionConfiguration(JSON.parse(meeting.data), joinInfo.Attendee);
 
       await meetingManager.join(meetingSessionConfiguration);
     } catch (error) {
@@ -90,28 +74,12 @@ const Home: NextPage<
   };
 
   const createMeeting = async () => {
-    meetingManager.getAttendee = async (
-      chimeAttendeeId: string,
-      externalUserId?: string
-    ) => ({
-      name: await trpcProxy(token).getUserName.query({
-        userId: externalUserId || chimeAttendeeId,
-      }),
-    });
-
     try {
       const joinInfo = await trpcProxy(token).createMeeting.mutate();
 
-      router.push(
-        { query: { meetingId: joinInfo.Meeting?.MeetingId } },
-        undefined,
-        { shallow: true }
-      );
+      router.push({ query: { meetingId: joinInfo.Meeting?.MeetingId } }, undefined, { shallow: true });
 
-      const meetingSessionConfiguration = new MeetingSessionConfiguration(
-        joinInfo.Meeting,
-        joinInfo.Attendee
-      );
+      const meetingSessionConfiguration = new MeetingSessionConfiguration(joinInfo.Meeting, joinInfo.Attendee);
 
       await meetingManager.join(meetingSessionConfiguration);
     } catch (error) {
@@ -128,13 +96,7 @@ const Home: NextPage<
 
   if (meetingStatus === MeetingStatus.Loading) return <LoadingSVG />;
 
-  return (
-    <>
-      <main className={`flex h-[100dvh] flex-col items-center justify-center`}>
-        <Meeting />
-      </main>
-    </>
-  );
+  return <Meeting />;
 };
 
 export default Home;
