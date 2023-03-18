@@ -3,7 +3,7 @@ import { GetServerSideProps } from "next";
 import { trpcProxy } from "~/utils/trpc";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const ss = await trpcProxy.test.greet.query();
+  const ss = await trpcProxy.auth.greet.query();
   debugger;
   return {
     props: {},

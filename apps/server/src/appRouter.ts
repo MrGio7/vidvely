@@ -1,1 +1,1 @@
-export type { AppRouter } from "./handlers/trpc.handler";
+export type { AppRouter } from "./router";
