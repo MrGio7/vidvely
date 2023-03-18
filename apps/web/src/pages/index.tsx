@@ -1,54 +1,40 @@
-import { MeetingProvider, MeetingStatus, darkTheme, useMeetingManager, useMeetingStatus } from "amazon-chime-sdk-component-library-react";
+import { MeetingStatus, useMeetingManager, useMeetingStatus } from "amazon-chime-sdk-component-library-react";
 import { MeetingSessionConfiguration } from "amazon-chime-sdk-js";
 import { GetServerSideProps, InferGetServerSidePropsType, type NextPage } from "next";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import { ThemeProvider } from "styled-components";
 import { LoadingSVG } from "~/assets/SVG";
 import Meeting from "~/components/Meeting";
-import { env } from "~/env.mjs";
-import { getServerAuthSession } from "~/server/auth";
 import { User } from "~/types/user";
+import { authenticateUser } from "~/utils/auth";
 import { trpcOutput, trpcProxy } from "~/utils/trpc";
 
 export const getServerSideProps: GetServerSideProps<{
   user: User;
-  token: string;
   meeting: trpcOutput["getMeeting"];
 }> = async (ctx) => {
-  const session = await getServerAuthSession(ctx);
+  await authenticateUser(ctx);
   const meetingId = ctx.query.meetingId as string | undefined;
 
-  if (!session)
-    return {
-      redirect: {
-        destination: "/auth/signin" + (meetingId ? `?meetingId=${meetingId}` : ""),
-        permanent: false,
-      },
-    };
-
-  const { token, user } = session;
-
-  const meeting = !!meetingId ? await trpcProxy(token).getMeeting.query({ meetingId }) : null;
+  const meeting = !!meetingId ? await trpcProxy.getMeeting.query({ meetingId }) : null;
+  const user = await trpcProxy.findOrCreateUser.mutate({});
 
   return {
     props: {
       user,
-      token,
       meeting,
     },
   };
 };
 
-const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({ user, token, meeting }) => {
+const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({ user, meeting }) => {
   const meetingManager = useMeetingManager();
   const meetingStatus = useMeetingStatus();
   const router = useRouter();
 
   useEffect(() => {
     meetingManager.getAttendee = async (chimeAttendeeId: string, externalUserId?: string) => ({
-      name: await trpcProxy(token).getUserName.query({
+      name: await trpcProxy.getUserName.query({
         userId: externalUserId || chimeAttendeeId,
       }),
     });
@@ -58,7 +44,7 @@ const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
     if (!meeting) return;
 
     try {
-      const joinInfo = await trpcProxy(token).joinMeeting.mutate({
+      const joinInfo = await trpcProxy.joinMeeting.mutate({
         meetingId: meeting.id,
       });
 
@@ -75,7 +61,7 @@ const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
 
   const createMeeting = async () => {
     try {
-      const joinInfo = await trpcProxy(token).createMeeting.mutate();
+      const joinInfo = await trpcProxy.createMeeting.mutate();
 
       router.push({ query: { meetingId: joinInfo.Meeting?.MeetingId } }, undefined, { shallow: true });
 

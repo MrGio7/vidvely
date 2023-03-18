@@ -2,6 +2,7 @@ import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import { createTRPCNext } from "@trpc/next";
 import { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "@vidvely/server";
+import { env } from "~/env.mjs";
 
 function getBaseUrl() {
   if (typeof window !== "undefined")
@@ -17,53 +18,42 @@ function getBaseUrl() {
   return `http://localhost:${process.env.PORT ?? 3000}`;
 }
 
-export const trpc = (token: string) =>
-  createTRPCNext<AppRouter>({
-    config() {
-      return {
-        links: [
-          httpBatchLink({
-            /**
-             * If you want to use SSR, you need to use the server's full URL
-             * @link https://trpc.io/docs/ssr
-             **/
-            url: `https://fjkq0vwtad.execute-api.eu-central-1.amazonaws.com`,
-            headers: () => {
-              return {
-                Authorization: token,
-              };
-            },
-          }),
-        ],
-        /**
-         * @link https://tanstack.com/query/v4/docs/reference/QueryClient
-         **/
-        // queryClientConfig: { defaultOptions: { queries: { staleTime: 60 } } },
-      };
-    },
-    /**
-     * @link https://trpc.io/docs/ssr
-     **/
-    ssr: false,
-  });
+let accessToken: string;
 
-export const trpcProxy = (token: string) =>
-  createTRPCProxyClient<AppRouter>({
-    links: [
-      httpBatchLink({
-        /**
-         * If you want to use SSR, you need to use the server's full URL
-         * @link https://trpc.io/docs/ssr
-         **/
-        url: `https://fjkq0vwtad.execute-api.eu-central-1.amazonaws.com`,
-        headers: () => {
-          return {
-            Authorization: token,
-          };
-        },
-      }),
-    ],
-  });
+export function setAccessToken(newAccessToken: string) {
+  accessToken = newAccessToken;
+}
+
+export const trpc = createTRPCNext<AppRouter>({
+  config() {
+    return {
+      links: [
+        httpBatchLink({
+          url: env.NEXT_PUBLIC_TRPC_ORIGIN,
+          headers() {
+            return {
+              Authorization: accessToken || "",
+            };
+          },
+        }),
+      ],
+    };
+  },
+  ssr: false,
+});
+
+export const trpcProxy = createTRPCProxyClient<AppRouter>({
+  links: [
+    httpBatchLink({
+      url: env.NEXT_PUBLIC_TRPC_ORIGIN,
+      headers: () => {
+        return {
+          Authorization: accessToken || "",
+        };
+      },
+    }),
+  ],
+});
 
 export type trpcInput = inferRouterInputs<AppRouter>;
 export type trpcOutput = inferRouterOutputs<AppRouter>;
