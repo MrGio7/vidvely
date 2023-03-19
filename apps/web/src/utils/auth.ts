@@ -11,6 +11,7 @@ export async function authenticateUser(ctx: GetServerSidePropsContext) {
 
   if (!!access_token) {
     setAccessToken(access_token);
+    return { accessToken: access_token };
   } else if (!!refresh_token) {
     const { accessToken } = await trpcProxy.auth.refreshAccessToken.mutate(refresh_token);
 
@@ -23,6 +24,8 @@ export async function authenticateUser(ctx: GetServerSidePropsContext) {
     });
 
     setAccessToken(accessToken);
+
+    return { accessToken };
   } else if (!!code) {
     const { accessToken, refreshToken } = await trpcProxy.auth.signIn.mutate(code);
 
@@ -43,10 +46,11 @@ export async function authenticateUser(ctx: GetServerSidePropsContext) {
     });
 
     setAccessToken(accessToken);
+    return { accessToken };
   } else {
     return {
       redirect: {
-        destination: `${env.COGNITO_DOMAIN}/oauth2/authorize?client_id=${env.COGNITO_CLIENT_ID}&response_type=code&scope=email+openid+phone&redirect_uri=${env.NEXT_ORIGIN}${meetingId ? `/?meetingId=${meetingId}` : ""}`,
+        destination: `${env.COGNITO_DOMAIN}/oauth2/authorize?client_id=${env.COGNITO_CLIENT_ID}&response_type=code&scope=email+openid+phone&redirect_uri=${env.NEXT_ORIGIN}&state=${meetingId || ""}`,
         permanent: false,
       },
     };

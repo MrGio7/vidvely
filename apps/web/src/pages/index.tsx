@@ -17,11 +17,9 @@ export const getServerSideProps: GetServerSideProps<{
 }> = async (ctx) => {
   const auth = await authenticateUser(ctx);
 
-  if (!!auth) return auth;
+  if (!!auth.redirect) return auth;
 
-  const access_token = ctx.req.cookies.access_token!;
-
-  const meetingId = ctx.query.meetingId as string | undefined;
+  const meetingId = ctx.query.state as string | undefined;
 
   const meeting = !!meetingId ? await trpcProxy.meeting.getMeeting.query({ meetingId }) : null;
   const user = await trpcProxy.user.findOrCreateUser.mutate({});
@@ -33,8 +31,7 @@ export const getServerSideProps: GetServerSideProps<{
         email: user.email,
       },
       meeting,
-
-      accessToken: access_token,
+      accessToken: auth.accessToken,
     },
   };
 };
@@ -55,6 +52,8 @@ const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
 
   const joinMeeting = async () => {
     if (!meeting) return;
+
+    router.push({ query: { meetingId: meeting.id } }, undefined, { shallow: true });
 
     try {
       const joinInfo = await trpcProxy.meeting.joinMeeting.mutate({
