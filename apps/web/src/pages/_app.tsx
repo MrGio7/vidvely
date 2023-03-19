@@ -4,15 +4,18 @@ import { MeetingProvider, darkTheme } from "amazon-chime-sdk-component-library-r
 import { ThemeProvider } from "styled-components";
 import "~/styles/globals.css";
 import { trpc } from "~/utils/trpc";
+import ErrorBoundary from "~/components/ErrorBoundary";
 
 const MyApp: AppType = ({ Component, pageProps: { ...pageProps } }) => {
   return (
-    <ThemeProvider theme={darkTheme}>
-      {/* @ts-ignore */}
-      <MeetingProvider>
-        <Component {...pageProps} />
-      </MeetingProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider theme={darkTheme}>
+        {/* @ts-ignore */}
+        <MeetingProvider>
+          <Component {...pageProps} />
+        </MeetingProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 };
 

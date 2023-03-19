@@ -64,7 +64,8 @@ const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
 
       await meetingManager.join(meetingSessionConfiguration);
     } catch (error) {
-      console.log(error);
+      console.error(error);
+      throw new Error("Join Meeting");
     }
 
     // At this point you can let users setup their devices, or start the session immediately
@@ -82,14 +83,18 @@ const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
       await meetingManager.join(meetingSessionConfiguration);
     } catch (error) {
       console.error(error);
+      throw new Error("Create Meeting");
     }
 
     await meetingManager.start();
   };
 
   useEffect(() => {
-    if (!meeting) createMeeting();
-    if (!!meeting) joinMeeting();
+    if (!!meeting) {
+      joinMeeting();
+    } else {
+      createMeeting();
+    }
   }, []);
 
   if (meetingStatus === MeetingStatus.Loading) return <LoadingSVG />;
