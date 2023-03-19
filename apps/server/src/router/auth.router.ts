@@ -1,5 +1,5 @@
-import { publicProcedure, router } from "src";
-import { authCodeHandler, refreshTokenHandler } from "src/services/auth.service";
+import { publicProcedure, router } from "../";
+import { authCodeHandler, refreshTokenHandler } from "../services/auth.service";
 import { z } from "zod";
 
 export const authRouter = router({

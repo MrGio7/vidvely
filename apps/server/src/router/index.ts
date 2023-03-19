@@ -1,4 +1,4 @@
-import { router } from "src";
+import { router } from "../";
 import { meetingRouter } from "./meeting.router";
 import { userRouter } from "./user.router";
 import { authRouter } from "./auth.router";

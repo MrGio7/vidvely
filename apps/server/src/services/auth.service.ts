@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { CognitoJwtVerifier } from "aws-jwt-verify";
-import axios from "axios";
+import axios from "axios"; //@ts-ignore
 import { prisma } from "/opt/client";
 
 interface AuthData {

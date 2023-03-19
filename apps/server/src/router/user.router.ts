@@ -1,5 +1,6 @@
-import { protectedProcedure, router } from "src";
+import { protectedProcedure, router } from "../";
 import { z } from "zod";
+//@ts-ignore
 import { prisma } from "/opt/client";
 
 export const userRouter = router({

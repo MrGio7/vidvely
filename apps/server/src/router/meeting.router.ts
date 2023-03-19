@@ -1,7 +1,8 @@
 import { TRPCError } from "@trpc/server";
-import { protectedProcedure, router } from "src";
-import { createChimeMeeting, endChimeMeeting, joinChimeMeeting } from "src/chime";
+import { protectedProcedure, router } from "../";
+import { createChimeMeeting, endChimeMeeting, joinChimeMeeting } from "../chime";
 import { z } from "zod";
+//@ts-ignore
 import { prisma } from "/opt/client";
 
 export const meetingRouter = router({
