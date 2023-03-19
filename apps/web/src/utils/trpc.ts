@@ -3,6 +3,7 @@ import { createTRPCNext } from "@trpc/next";
 import { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "@vidvely/server";
 import { env } from "~/env.mjs";
+import superjson from "superjson";
 
 function getBaseUrl() {
   if (typeof window !== "undefined")
@@ -27,6 +28,7 @@ export function setAccessToken(newAccessToken: string) {
 export const trpc = createTRPCNext<AppRouter>({
   config() {
     return {
+      // transformer: superjson,
       links: [
         httpBatchLink({
           url: env.NEXT_PUBLIC_TRPC_ORIGIN,
@@ -43,6 +45,7 @@ export const trpc = createTRPCNext<AppRouter>({
 });
 
 export const trpcProxy = createTRPCProxyClient<AppRouter>({
+  // transformer: superjson,
   links: [
     httpBatchLink({
       url: env.NEXT_PUBLIC_TRPC_ORIGIN,

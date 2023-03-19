@@ -14,10 +14,10 @@ interface AuthData {
 export async function authCodeHandler(authCode: string) {
   const authData: AuthData | null = await axios
     .post(
-      "https://vidvaley-dev.auth.eu-central-1.amazoncognito.com/oauth2/token",
+      `${process.env.COGNITO_DOMAIN}/oauth2/token`,
       {
         grant_type: "authorization_code",
-        client_id: "3cermrrihd00fn1742frogg4ip",
+        client_id: process.env.COGNITO_CLIENT_ID,
         code: authCode,
         redirect_uri: `${process.env.CLIENT_URL}`,
       },
@@ -29,9 +29,9 @@ export async function authCodeHandler(authCode: string) {
   if (!authData) throw new TRPCError({ code: "UNAUTHORIZED" });
 
   const verifier = CognitoJwtVerifier.create({
-    userPoolId: "eu-central-1_3JGV6ob34",
     tokenUse: "id",
-    clientId: "3cermrrihd00fn1742frogg4ip",
+    userPoolId: process.env.COGNITO_POOL_ID!,
+    clientId: process.env.COGNITO_CLIENT_ID!,
   });
 
   const payload = await verifier.verify(authData.id_token);
@@ -51,10 +51,10 @@ export async function authCodeHandler(authCode: string) {
 export async function refreshTokenHandler(refresh_token: string) {
   const authData: { access_token: string } | null = await axios
     .post(
-      "https://vidvaley-dev.auth.eu-central-1.amazoncognito.com/oauth2/token",
+      `${process.env.COGNITO_DOMAIN}/oauth2/token`,
       {
         grant_type: "refresh_token",
-        client_id: "3cermrrihd00fn1742frogg4ip",
+        client_id: process.env.COGNITO_CLIENT_ID!,
         refresh_token,
       },
       { headers: { "Content-Type": "application/x-www-form-urlencoded" } }

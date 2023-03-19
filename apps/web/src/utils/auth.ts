@@ -12,7 +12,7 @@ export async function authenticateUser(ctx: GetServerSidePropsContext) {
   if (!!access_token) {
     setAccessToken(access_token);
   } else if (!!refresh_token) {
-    const { accessToken } = await trpcProxy.refreshToken.mutate(refresh_token);
+    const { accessToken } = await trpcProxy.auth.refreshAccessToken.mutate(refresh_token);
 
     nookies.set(ctx, "access_token", accessToken, {
       path: "/",
@@ -24,7 +24,7 @@ export async function authenticateUser(ctx: GetServerSidePropsContext) {
 
     setAccessToken(accessToken);
   } else if (!!code) {
-    const { accessToken, refreshToken } = await trpcProxy.signIn.mutate(code);
+    const { accessToken, refreshToken } = await trpcProxy.auth.signIn.mutate(code);
 
     nookies.set(ctx, "access_token", accessToken, {
       path: "/",

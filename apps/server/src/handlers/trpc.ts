@@ -24,7 +24,7 @@ const setOptionsResMiddleware = (): middy.MiddlewareObj<APIGatewayProxyEventV2, 
   };
 };
 
-export const trpc = middy()
+export const handler = middy()
   .handler(
     awsLambdaRequestHandler({
       router: appRouter,

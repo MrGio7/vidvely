@@ -7,34 +7,47 @@ import { LoadingSVG } from "~/assets/SVG";
 import Meeting from "~/components/Meeting";
 import { User } from "~/types/user";
 import { authenticateUser } from "~/utils/auth";
-import { trpcOutput, trpcProxy } from "~/utils/trpc";
+import { setAccessToken, trpcOutput, trpcProxy } from "~/utils/trpc";
 
+// @ts-ignore
 export const getServerSideProps: GetServerSideProps<{
-  user: User;
-  meeting: trpcOutput["getMeeting"];
+  user: Partial<User>;
+  meeting: trpcOutput["meeting"]["getMeeting"];
+  accessToken: string;
 }> = async (ctx) => {
-  await authenticateUser(ctx);
+  const auth = await authenticateUser(ctx);
+
+  if (!!auth) return auth;
+
+  const access_token = ctx.req.cookies.access_token!;
+
   const meetingId = ctx.query.meetingId as string | undefined;
 
-  const meeting = !!meetingId ? await trpcProxy.getMeeting.query({ meetingId }) : null;
-  const user = await trpcProxy.findOrCreateUser.mutate({});
+  const meeting = !!meetingId ? await trpcProxy.meeting.getMeeting.query({ meetingId }) : null;
+  const user = await trpcProxy.user.findOrCreateUser.mutate({});
 
   return {
     props: {
-      user,
+      user: {
+        id: user.id,
+        email: user.email,
+      },
       meeting,
+
+      accessToken: access_token,
     },
   };
 };
 
-const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({ user, meeting }) => {
+const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({ user, meeting, accessToken }) => {
+  setAccessToken(accessToken);
   const meetingManager = useMeetingManager();
   const meetingStatus = useMeetingStatus();
   const router = useRouter();
 
   useEffect(() => {
     meetingManager.getAttendee = async (chimeAttendeeId: string, externalUserId?: string) => ({
-      name: await trpcProxy.getUserName.query({
+      name: await trpcProxy.user.getUserName.query({
         userId: externalUserId || chimeAttendeeId,
       }),
     });
@@ -44,7 +57,7 @@ const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
     if (!meeting) return;
 
     try {
-      const joinInfo = await trpcProxy.joinMeeting.mutate({
+      const joinInfo = await trpcProxy.meeting.joinMeeting.mutate({
         meetingId: meeting.id,
       });
 
@@ -61,7 +74,7 @@ const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
 
   const createMeeting = async () => {
     try {
-      const joinInfo = await trpcProxy.createMeeting.mutate();
+      const joinInfo = await trpcProxy.meeting.createMeeting.mutate();
 
       router.push({ query: { meetingId: joinInfo.Meeting?.MeetingId } }, undefined, { shallow: true });
 

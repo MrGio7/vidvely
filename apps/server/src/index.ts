@@ -3,12 +3,13 @@ import { CreateAWSLambdaContextOptions } from "@trpc/server/adapters/aws-lambda"
 import { CognitoJwtVerifier } from "aws-jwt-verify";
 import { APIGatewayProxyEventV2 } from "aws-lambda";
 import { appRouter } from "./router";
+import superjson from "superjson";
 
 async function getUserId(access_token: string) {
   const verifier = CognitoJwtVerifier.create({
-    userPoolId: "eu-central-1_3JGV6ob34",
     tokenUse: "access",
-    clientId: "389ia6feqe77a0gbf15c3dudbp",
+    userPoolId: process.env.COGNITO_POOL_ID!,
+    clientId: process.env.COGNITO_CLIENT_ID!,
   });
   try {
     const payload = await verifier.verify(access_token);
@@ -34,7 +35,9 @@ export async function createContext({ event, context }: CreateAWSLambdaContextOp
 
 type Context = inferAsyncReturnType<typeof createContext>;
 
-const t = initTRPC.context<Context>().create();
+const t = initTRPC.context<Context>().create({
+  // transformer: superjson,
+});
 
 export const publicProcedure = t.procedure;
 export const router = t.router;
