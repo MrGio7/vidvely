@@ -9,7 +9,6 @@ import { User } from "~/types/user";
 import { authenticateUser } from "~/utils/auth";
 import { setAccessToken, trpcOutput, trpcProxy } from "~/utils/trpc";
 
-// @ts-ignore
 export const getServerSideProps: GetServerSideProps<{
   user: Partial<User>;
   meeting: trpcOutput["meeting"]["getMeeting"];
@@ -19,7 +18,7 @@ export const getServerSideProps: GetServerSideProps<{
 
   if (!!auth.redirect) return auth;
 
-  const meetingId = ctx.query.state as string | undefined;
+  const meetingId = (ctx.query.meetingId as string | undefined) || (ctx.query.state as string | undefined);
 
   const meeting = !!meetingId ? await trpcProxy.meeting.getMeeting.query({ meetingId }) : null;
   const user = await trpcProxy.user.findOrCreateUser.mutate({});
@@ -41,14 +40,6 @@ const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
   const meetingManager = useMeetingManager();
   const meetingStatus = useMeetingStatus();
   const router = useRouter();
-
-  useEffect(() => {
-    meetingManager.getAttendee = async (chimeAttendeeId: string, externalUserId?: string) => ({
-      name: await trpcProxy.user.getUserName.query({
-        userId: externalUserId || chimeAttendeeId,
-      }),
-    });
-  }, []);
 
   const joinMeeting = async () => {
     if (!meeting) return;
@@ -90,6 +81,12 @@ const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
   };
 
   useEffect(() => {
+    meetingManager.getAttendee = async (chimeAttendeeId: string, externalUserId?: string) => ({
+      name: await trpcProxy.user.getUserName.query({
+        userId: externalUserId || chimeAttendeeId,
+      }),
+    });
+
     if (!!meeting) {
       joinMeeting();
     } else {
