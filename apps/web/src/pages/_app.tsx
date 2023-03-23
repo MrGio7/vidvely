@@ -5,6 +5,7 @@ import { ThemeProvider } from "styled-components";
 import "~/styles/globals.css";
 import { trpc } from "~/utils/trpc";
 import ErrorBoundary from "~/components/ErrorBoundary";
+import AppContextProvider from "~/context/app.context";
 
 const MyApp: AppType = ({ Component, pageProps: { ...pageProps } }) => {
   return (
@@ -12,7 +13,9 @@ const MyApp: AppType = ({ Component, pageProps: { ...pageProps } }) => {
       <ThemeProvider theme={darkTheme}>
         {/* @ts-ignore */}
         <MeetingProvider>
-          <Component {...pageProps} />
+          <AppContextProvider>
+            <Component {...pageProps} />
+          </AppContextProvider>
         </MeetingProvider>
       </ThemeProvider>
     </ErrorBoundary>

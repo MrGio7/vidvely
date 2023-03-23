@@ -5,12 +5,13 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { LoadingSVG } from "~/assets/SVG";
 import Meeting from "~/components/Meeting";
+import { useAppContext } from "~/context/app.context";
 import { User } from "~/types/user";
 import { authenticateUser } from "~/utils/auth";
 import { setAccessToken, trpcOutput, trpcProxy } from "~/utils/trpc";
 
 export const getServerSideProps: GetServerSideProps<{
-  user: Partial<User>;
+  user: User;
   meeting: trpcOutput["meeting"]["getMeeting"];
   accessToken: string;
 }> = async (ctx) => {
@@ -21,13 +22,15 @@ export const getServerSideProps: GetServerSideProps<{
   const meetingId = (ctx.query.meetingId as string | undefined) || (ctx.query.state as string | undefined);
 
   const meeting = !!meetingId ? await trpcProxy.meeting.getMeeting.query({ meetingId }) : null;
-  const user = await trpcProxy.user.findOrCreateUser.mutate({});
+  const user = await trpcProxy.user.getUserInfo.query();
 
   return {
     props: {
       user: {
         id: user.id,
         email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
       },
       meeting,
       accessToken: auth.accessToken,
@@ -37,6 +40,8 @@ export const getServerSideProps: GetServerSideProps<{
 
 const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({ user, meeting, accessToken }) => {
   setAccessToken(accessToken);
+  const { setUser } = useAppContext();
+  setUser(user);
   const meetingManager = useMeetingManager();
   const meetingStatus = useMeetingStatus();
   const router = useRouter();
@@ -96,7 +101,11 @@ const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
 
   if (meetingStatus === MeetingStatus.Loading) return <LoadingSVG />;
 
-  return <Meeting />;
+  return (
+    <>
+      <Meeting />
+    </>
+  );
 };
 
 export default Home;

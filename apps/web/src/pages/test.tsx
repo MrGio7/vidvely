@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { GetServerSideProps } from "next";
 import { trpcProxy, trpc } from "~/utils/trpc";
-import { env } from "~/env.mjs";
+
+import UserMenu from "~/components/UserMenu";
+import Meeting from "~/components/Meeting";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   return {
@@ -12,16 +14,12 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 interface TestProps {}
 
 const Test: React.FC<TestProps> = () => {
-  const [test, setTest] = useState("");
-  console.log(env.NEXT_PUBLIC_TRPC_ORIGIN);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      trpcProxy.auth.greet.query().then((res) => console.log(res));
-    }
-  }, []);
-
-  return <h1>Hello World</h1>;
+  return (
+    <>
+      <Meeting />
+      <UserMenu />
+    </>
+  );
 };
 
 export default Test;
