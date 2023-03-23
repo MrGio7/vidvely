@@ -19,6 +19,13 @@ const UserMenu: React.FC<UserMenuProps> = () => {
     setUser((prevState) => (!!prevState ? { ...prevState, firstName, lastName } : null));
   };
 
+  const logoutHandler = async () => {
+    setUser(null);
+    await fetch("api/auth/signout")
+      .then((res) => res.json())
+      .then((redirectUrl) => window.location.replace(redirectUrl));
+  };
+
   const updateUserButtonContent = (() => {
     if (userUpdateIsLoading)
       return (
@@ -47,25 +54,29 @@ const UserMenu: React.FC<UserMenuProps> = () => {
 
   return (
     <section className="group absolute top-5 left-5">
-      <UserSVG className="h-14 w-14 text-slate-300" />
+      <UserSVG className="h-12 w-12 text-slate-300" />
       <ul className="mt-2 hidden flex-col gap-y-2 rounded-md bg-slate-300 p-5 group-hover:flex">
         <li className="text-xl">
-          <form className="flex flex-col gap-y-2" onSubmit={userUpdateSubmitHandler}>
+          <form className="flex flex-col" onSubmit={userUpdateSubmitHandler}>
             <label className="text-sm" htmlFor="firstName">
               First Name
             </label>
             <input type="text" name="firstName" id="firstName" defaultValue={user?.firstName || ""} />
-            <label className="text-sm" htmlFor="lastName">
+            <label className="mt-2 text-sm" htmlFor="lastName">
               Last Name
             </label>
             <input type="text" name="lastName" id="lastName" defaultValue={user?.lastName || ""} />
-            <button className="mx-auto inline-flex w-3/5 items-center justify-center rounded-md bg-indigo-500 px-4 py-2 text-sm font-semibold leading-6 text-white shadow" disabled={userUpdateIsLoading}>
+            <button className="mx-auto my-2 inline-flex w-3/5 items-center justify-center rounded-md bg-indigo-500 px-4 py-2 text-sm font-semibold leading-6 text-white shadow" disabled={userUpdateIsLoading}>
               {updateUserButtonContent}
             </button>
           </form>
         </li>
         <hr className="border-1 border-slate-900" />
-        <li className="text-xl">Logout</li>
+        <li className="flex w-full justify-center text-xl">
+          <button className="mx-auto mt-2 inline-flex w-3/5 items-center justify-center rounded-md bg-red-700 px-4 py-2 text-sm font-semibold leading-6 text-white shadow" onClick={logoutHandler}>
+            Logout
+          </button>
+        </li>
       </ul>
     </section>
   );

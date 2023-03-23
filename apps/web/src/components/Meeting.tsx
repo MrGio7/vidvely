@@ -21,7 +21,7 @@ const Meeting: FC = () => {
     <main className={`flex h-[100dvh] w-full flex-col items-center justify-between`}>
       {/* @ts-ignore */}
       <VideoTileGrid layout="standard" className="h-full !bg-gray-900" />
-      <button className="absolute top-5 left-5 text-[whitesmoke] focus:text-green-500" onClick={() => navigator.clipboard.writeText(window.location.href.toString())}>
+      <button className="absolute top-5 right-5 text-[whitesmoke] focus:text-green-500" onClick={() => navigator.clipboard.writeText(window.location.href.toString())}>
         <CopySVG />
       </button>
       <ControlBar className="!relative !border-gray-800 !bg-gray-900" layout="bottom" showLabels>

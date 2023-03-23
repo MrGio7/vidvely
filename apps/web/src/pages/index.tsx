@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { LoadingSVG } from "~/assets/SVG";
 import Meeting from "~/components/Meeting";
+import UserMenu from "~/components/UserMenu";
 import { useAppContext } from "~/context/app.context";
 import { User } from "~/types/user";
 import { authenticateUser } from "~/utils/auth";
@@ -104,6 +105,7 @@ const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
   return (
     <>
       <Meeting />
+      <UserMenu />
     </>
   );
 };
