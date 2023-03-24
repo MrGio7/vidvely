@@ -1,12 +1,13 @@
 import { FC, useState } from "react";
 
-import { Attendees, AudioInputControl, AudioOutputControl, Badge, ControlBar, ControlBarButton, Phone, RosterGroup, VideoInputControl, VideoTileGrid, useMeetingManager, useRosterState } from "amazon-chime-sdk-component-library-react";
+import { Attendees, AudioInputControl, AudioOutputControl, Badge, ControlBar, ControlBarButton, Share, Phone, RosterGroup, VideoInputControl, VideoTileGrid, useContentShareControls, useMeetingManager, useRosterState } from "amazon-chime-sdk-component-library-react";
 import { CopySVG } from "../assets/SVG";
 import RosterAttendee from "./RosterAttendee";
 
 const Meeting: FC = () => {
   const [areAttendeesShown, setAreAttendeesShown] = useState(true);
   const meetingManager = useMeetingManager();
+  const { toggleContentShare } = useContentShareControls();
   const { roster } = useRosterState();
   const attendees = Object.values(roster);
 
@@ -27,6 +28,7 @@ const Meeting: FC = () => {
       <ControlBar className="!relative !border-gray-800 !bg-gray-900" layout="bottom" showLabels>
         <AudioInputControl className="text-indigo-200" />
         <VideoInputControl />
+        <ControlBarButton icon={<Share />} onClick={toggleContentShare} label="Share" />
         <AudioOutputControl />
         <div className="relative">
           <Badge className="absolute -top-2 right-2" value={attendees.length} />

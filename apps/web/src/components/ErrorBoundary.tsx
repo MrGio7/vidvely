@@ -28,7 +28,7 @@ class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <h1>
+        <h1 className="w-full text-xl text-slate-300">
           Sorry.. there was an error: <span>{this.state.message}</span>
         </h1>
       );
