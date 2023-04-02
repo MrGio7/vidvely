@@ -26,7 +26,6 @@ const serverlessConfiguration: AWS = {
       COGNITO_POOL_ID: "${env:COGNITO_POOL_ID}",
       COGNITO_CLIENT_ID: "${env:COGNITO_CLIENT_ID}",
       COGNITO_DOMAIN: "${env:COGNITO_DOMAIN}",
-      CLIENT_URL: "${env:CLIENT_URL}",
     },
   },
 
