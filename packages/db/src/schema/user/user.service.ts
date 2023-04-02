@@ -16,7 +16,7 @@ export class UserService extends Dynamo {
     const createUserCommand = new PutItemCommand({
       TableName: this.tableName,
       Item: {
-        id: { S: id },
+        userId: { S: id },
         createdAt: { S: new Date().toISOString() },
         updatedAt: { S: new Date().toISOString() },
         email: { S: email || "" },
@@ -25,9 +25,14 @@ export class UserService extends Dynamo {
       },
     });
 
-    const user = await this.send(createUserCommand);
+    await this.send(createUserCommand);
 
-    return user;
+    return {
+      id,
+      email,
+      firstName,
+      lastName,
+    };
   }
 
   async find(userId: string) {
@@ -63,9 +68,21 @@ export class UserService extends Dynamo {
         firstName: !!firstName ? { Value: { S: firstName } } : {},
         lastName: !!lastName ? { Value: { S: lastName } } : {},
       },
+      ReturnValues: "ALL_NEW",
     });
 
-    const user = await this.send(updateUserCommand);
+    const user = await this.send(updateUserCommand).then((data) => {
+      if (!data.Attributes) throw new Error("User not found");
+
+      return {
+        id: data.Attributes.userId.S!,
+        email: data.Attributes.email.S!,
+        firstName: data.Attributes.firstName.S!,
+        lastName: data.Attributes.lastName.S!,
+        createdAt: data.Attributes.createdAt.S!,
+        updatedAt: data.Attributes.updatedAt.S!,
+      };
+    });
 
     return user;
   }

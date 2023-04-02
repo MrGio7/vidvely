@@ -11,7 +11,12 @@ interface AuthData {
   token_type: string;
 }
 
-export async function authCodeHandler(authCode: string) {
+interface AuthCodeHandlerInput {
+  authCode: string;
+  redirectUrl: string;
+}
+
+export async function authCodeHandler({ authCode, redirectUrl }: AuthCodeHandlerInput) {
   const authData: AuthData | null = await axios
     .post(
       `${process.env.COGNITO_DOMAIN}/oauth2/token`,
@@ -19,7 +24,7 @@ export async function authCodeHandler(authCode: string) {
         grant_type: "authorization_code",
         client_id: process.env.COGNITO_CLIENT_ID,
         code: authCode,
-        redirect_uri: `${process.env.CLIENT_URL}`,
+        redirect_uri: redirectUrl,
       },
       { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     )
@@ -36,13 +41,15 @@ export async function authCodeHandler(authCode: string) {
 
   const payload = await verifier.verify(authData.id_token);
 
-  const user = await db.user.find(payload.sub).catch((error) => console.error(error));
+  if (!!payload.sub) {
+    const user = await db.user.find(payload.sub);
 
-  if (!user)
-    await db.user.create({
-      id: payload.sub,
-      email: payload.email?.toString() || "",
-    });
+    if (!user)
+      await db.user.create({
+        id: payload.sub,
+        email: payload.email?.toString() || "",
+      });
+  }
 
   return {
     accessToken: authData.access_token,

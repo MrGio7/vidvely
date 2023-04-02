@@ -7,13 +7,14 @@ import { LoadingSVG } from "~/assets/SVG";
 import Meeting from "~/components/Meeting";
 import UserMenu from "~/components/UserMenu";
 import { useAppContext } from "~/context/app.context";
+import { env } from "~/env.mjs";
 import { User } from "~/types/user";
 import { authenticateUser } from "~/utils/auth";
 import { setAccessToken, trpcOutput, trpcProxy } from "~/utils/trpc";
 
 export const getServerSideProps: GetServerSideProps<{
   user: User;
-  meeting: trpcOutput["meeting"]["getMeeting"];
+  meeting: trpcOutput["meeting"]["getMeeting"] | null;
   accessToken: string;
 }> = async (ctx) => {
   const auth = await authenticateUser(ctx);
@@ -24,6 +25,14 @@ export const getServerSideProps: GetServerSideProps<{
 
   const meeting = !!meetingId ? await trpcProxy.meeting.getMeeting.query({ meetingId }) : null;
   const user = await trpcProxy.user.getUserInfo.query();
+
+  if (!user)
+    return {
+      redirect: {
+        destination: `${env.COGNITO_DOMAIN}/oauth2/authorize?client_id=${env.COGNITO_CLIENT_ID}&response_type=code&scope=email+openid+phone&redirect_uri=${env.NEXT_ORIGIN}&state=${meetingId || ""}`,
+        permanent: false,
+      },
+    };
 
   return {
     props: {

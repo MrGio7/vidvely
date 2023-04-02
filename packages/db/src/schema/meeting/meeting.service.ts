@@ -16,7 +16,7 @@ export class MeetingService extends Dynamo {
     const createUserCommand = new PutItemCommand({
       TableName: this.tableName,
       Item: {
-        id: { S: id },
+        meetingId: { S: id },
         createdAt: { S: new Date().toISOString() },
         updatedAt: { S: new Date().toISOString() },
         data: { S: data },
@@ -24,19 +24,13 @@ export class MeetingService extends Dynamo {
       },
     });
 
-    const user = await this.send(createUserCommand).then((data) => {
-      if (!data.Attributes) throw new Error("Meeting not found");
+    await this.send(createUserCommand);
 
-      return {
-        id: data.Attributes.meetingId.S!,
-        data: data.Attributes.data.S!,
-        users: data.Attributes.users.SS!,
-        createdAt: data.Attributes.createdAt.S!,
-        updatedAt: data.Attributes.updatedAt.S!,
-      };
-    });
-
-    return user;
+    return {
+      id,
+      data,
+      users: [userId],
+    };
   }
 
   async find(meetingId: string) {
@@ -73,6 +67,7 @@ export class MeetingService extends Dynamo {
         data: !!data ? { Value: { S: data } } : {},
         users: !!userId ? { Value: { SS: [...currentMeeting.users, userId] } } : {},
       },
+      ReturnValues: "ALL_NEW",
     });
 
     const meeting = await this.send(updateMeetingCommand).then((data) => {
