@@ -1,3 +1,3 @@
 {
-  "references": [{ "path": "apps/server" }]
+  "references": [{ "path": "apps/server" }, { "path": "packages/db" }]
 }

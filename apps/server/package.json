@@ -4,18 +4,15 @@
   "main": "src/appRouter.ts",
   "scripts": {
     "dev": "cross-env NODE_ENV=local sls offline",
-    "prisma:build": "ts-node esbuild.layers.ts",
-    "prisma:generate": "prisma generate",
     "package:dev": "cross-env NODE_ENV=development sls package",
-    "predeploy:dev": "npm run prisma:generate && npm run prisma:build",
     "deploy:dev": "cross-env NODE_ENV=development sls deploy"
   },
   "dependencies": {
     "@aws-sdk/client-chime": "^3.282.0",
     "@middy/core": "^4.2.6",
     "@middy/http-cors": "^4.2.6",
-    "@prisma/client": "^4.11.0",
     "@trpc/server": "^10.14.0",
+    "@vidvely/db": "*",
     "aws-jwt-verify": "^3.4.0",
     "aws-lambda": "^1.0.7",
     "superjson": "^1.12.2",
@@ -29,7 +26,6 @@
     "@types/uuid": "^9.0.1",
     "esbuild": "^0.17.11",
     "esbuild-plugin-copy": "^2.0.2",
-    "prisma": "^4.11.0",
     "serverless": "^3.28.1",
     "serverless-esbuild": "^1.39.0",
     "serverless-offline": "^12.0.4"

@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
+import { db } from "@vidvely/db";
 import { CognitoJwtVerifier } from "aws-jwt-verify";
-import axios from "axios"; //@ts-ignore
-import { prisma } from "/opt/client";
+import axios from "axios";
 
 interface AuthData {
   id_token: string;
@@ -36,11 +36,13 @@ export async function authCodeHandler(authCode: string) {
 
   const payload = await verifier.verify(authData.id_token);
 
-  await prisma.user.upsert({
-    where: { id: payload.sub },
-    create: { id: payload.sub, email: (payload.email as string) || undefined },
-    update: { email: (payload.email as string) || undefined },
-  });
+  const user = await db.user.find(payload.sub).catch((error) => console.error(error));
+
+  if (!user)
+    await db.user.create({
+      id: payload.sub,
+      email: payload.email?.toString() || "",
+    });
 
   return {
     accessToken: authData.access_token,
