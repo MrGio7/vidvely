@@ -45,12 +45,12 @@ export class UserService extends Dynamo {
       if (!data.Item) return null;
 
       return {
-        id: data.Item.userId.S!,
-        email: data.Item.email.S!,
-        firstName: data.Item.firstName.S!,
-        lastName: data.Item.lastName.S!,
-        createdAt: data.Item.createdAt.S!,
-        updatedAt: data.Item.updatedAt.S!,
+        id: data.Item.userId?.S!,
+        email: data.Item.email?.S!,
+        firstName: data.Item.firstName?.S!,
+        lastName: data.Item.lastName?.S!,
+        createdAt: data.Item.createdAt?.S!,
+        updatedAt: data.Item.updatedAt?.S!,
       };
     });
 
@@ -75,12 +75,12 @@ export class UserService extends Dynamo {
       if (!data.Attributes) throw new Error("User not found");
 
       return {
-        id: data.Attributes.userId.S!,
-        email: data.Attributes.email.S!,
-        firstName: data.Attributes.firstName.S!,
-        lastName: data.Attributes.lastName.S!,
-        createdAt: data.Attributes.createdAt.S!,
-        updatedAt: data.Attributes.updatedAt.S!,
+        id: data.Attributes.userId?.S!,
+        email: data.Attributes.email?.S!,
+        firstName: data.Attributes.firstName?.S!,
+        lastName: data.Attributes.lastName?.S!,
+        createdAt: data.Attributes.createdAt?.S!,
+        updatedAt: data.Attributes.updatedAt?.S!,
       };
     });
 

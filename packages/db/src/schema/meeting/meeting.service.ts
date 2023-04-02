@@ -43,11 +43,11 @@ export class MeetingService extends Dynamo {
       if (!data.Item) throw new Error("Meeting not found");
 
       return {
-        id: data.Item.meetingId.S!,
-        data: data.Item.data.S!,
-        users: data.Item.users.SS!,
-        createdAt: data.Item.createdAt.S!,
-        updatedAt: data.Item.updatedAt.S!,
+        id: data.Item.meetingId?.S!,
+        data: data.Item.data?.S!,
+        users: data.Item.users?.SS!,
+        createdAt: data.Item.createdAt?.S!,
+        updatedAt: data.Item.updatedAt?.S!,
       };
     });
 
@@ -74,11 +74,11 @@ export class MeetingService extends Dynamo {
       if (!data.Attributes) throw new Error("Meeting not found");
 
       return {
-        id: data.Attributes.meetingId.S!,
-        data: data.Attributes.data.S!,
-        users: data.Attributes.users.SS!,
-        createdAt: data.Attributes.createdAt.S!,
-        updatedAt: data.Attributes.updatedAt.S!,
+        id: data.Attributes.meetingId?.S!,
+        data: data.Attributes.data?.S!,
+        users: data.Attributes.users?.SS!,
+        createdAt: data.Attributes.createdAt?.S!,
+        updatedAt: data.Attributes.updatedAt?.S!,
       };
     });
 
