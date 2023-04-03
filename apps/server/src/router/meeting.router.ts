@@ -2,8 +2,8 @@ import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../";
 import { createChimeMeeting, endChimeMeeting, joinChimeMeeting } from "../chime";
 import { z } from "zod";
-//@ts-ignore
-import { prisma } from "/opt/client";
+import { db } from "@vidvely/db";
+import { MeetingStatus } from "@vidvely/db/src/schema/meeting/meeting.type";
 
 export const meetingRouter = router({
   createMeeting: protectedProcedure.mutation(async ({ ctx, input }) => {
@@ -13,12 +13,10 @@ export const meetingRouter = router({
 
     if (!meetingInfo.Meeting) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: "meeting id is not defined" });
 
-    await prisma.meeting.create({
-      data: {
-        id: meetingInfo.Meeting.MeetingId,
-        data: JSON.stringify(meetingInfo),
-        users: { connect: { id: userId } },
-      },
+    await db.meeting.create({
+      id: meetingInfo.Meeting.MeetingId!,
+      data: JSON.stringify(meetingInfo),
+      userId,
     });
 
     return meetingInfo;
@@ -34,7 +32,7 @@ export const meetingRouter = router({
       const { userId } = ctx;
       const { meetingId } = input;
 
-      await prisma.user.update({ where: { id: userId }, data: { meetings: { connect: { id: meetingId } } } });
+      await db.user.update({ id: userId, meetingId });
 
       return joinChimeMeeting({ meetingId, userId });
     }),
@@ -44,16 +42,16 @@ export const meetingRouter = router({
 
     await endChimeMeeting(meetingId);
 
-    await prisma.meeting.update({
-      where: { id: meetingId },
-      data: { status: "ENDED" },
+    await db.meeting.update({
+      id: meetingId,
+      status: MeetingStatus.COMPLETED,
     });
   }),
 
   getMeeting: protectedProcedure.input(z.object({ meetingId: z.string().uuid() })).query(async ({ ctx, input }) => {
     const { meetingId } = input;
 
-    const meeting = await prisma.meeting.findUnique({ where: { id: meetingId } });
+    const meeting = await db.meeting.find(meetingId);
 
     return meeting;
   }),

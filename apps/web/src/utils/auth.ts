@@ -27,7 +27,10 @@ export async function authenticateUser(ctx: GetServerSidePropsContext) {
 
     return { accessToken };
   } else if (!!code) {
-    const { accessToken, refreshToken } = await trpcProxy.auth.signIn.mutate(code);
+    const { accessToken, refreshToken } = await trpcProxy.auth.signIn.mutate({
+      code: code,
+      redirectUrl: env.NEXT_ORIGIN,
+    });
 
     nookies.set(ctx, "access_token", accessToken, {
       path: "/",

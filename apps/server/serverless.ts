@@ -10,8 +10,7 @@ const serverlessConfiguration: AWS = {
     name: "aws",
     runtime: "nodejs16.x",
     region: "eu-central-1",
-    profile: "MrGio7",
-    timeout: 60,
+    timeout: 25,
     httpApi: {
       cors: {
         allowCredentials: true,
@@ -23,11 +22,9 @@ const serverlessConfiguration: AWS = {
       },
     },
     environment: {
-      DATABASE_URL: "${env:DATABASE_URL}",
       COGNITO_POOL_ID: "${env:COGNITO_POOL_ID}",
       COGNITO_CLIENT_ID: "${env:COGNITO_CLIENT_ID}",
       COGNITO_DOMAIN: "${env:COGNITO_DOMAIN}",
-      CLIENT_URL: "${env:CLIENT_URL}",
     },
   },
 
@@ -39,18 +36,8 @@ const serverlessConfiguration: AWS = {
   useDotenv: true,
 
   custom: {
-    esbuild: {
-      external: process.env.NODE_ENV !== "local" ? ["/opt/client"] : [],
-    },
     "serverless-offline": {
       httpPort: 4000,
-    },
-  },
-
-  layers: {
-    Prisma: {
-      name: "Prisma",
-      path: "./.layers/prisma",
     },
   },
 
@@ -58,8 +45,8 @@ const serverlessConfiguration: AWS = {
     trpc: {
       handler: "src/handlers/trpc.handler",
       events: [{ httpApi: "OPTIONS /{proxy+}" }, { httpApi: "*" }],
-      layers: [{ Ref: "PrismaLambdaLayer" }],
     },
   },
 };
+
 module.exports = serverlessConfiguration;
