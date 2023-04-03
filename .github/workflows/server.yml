@@ -8,6 +8,11 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  COGNITO_POOL_ID: ${{ secrets.COGNITO_POOL_ID }}
+  COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
+  COGNITO_DOMAIN: ${{ secrets.COGNITO_DOMAIN }}
+
 jobs:
   deploy:
     name: Deploy Server
