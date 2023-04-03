@@ -1,4 +1,4 @@
-import { AttributeValue, GetItemCommand, PutItemCommand, ScalarAttributeType, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
+import { AttributeValue, GetItemCommand, PutItemCommand, ScalarAttributeType, UpdateItemCommand, UpdateItemInput } from "@aws-sdk/client-dynamodb";
 import { Dynamo } from "../../client";
 import { CreateUserInput, UpdateUserInput } from "./user.type";
 
@@ -59,19 +59,22 @@ export class UserService extends Dynamo {
 
   async update(updateUserInput: UpdateUserInput) {
     const { id, email, firstName, lastName } = updateUserInput;
+    const AttributeUpdates: UpdateItemInput["AttributeUpdates"] = {
+      updatedAt: { Value: { S: new Date().toISOString() } },
+    };
+    if (!!email) AttributeUpdates["email"] = { Value: { S: email } };
+    if (!!firstName) AttributeUpdates["firstName"] = { Value: { S: firstName } };
+    if (!!lastName) AttributeUpdates["lastName"] = { Value: { S: lastName } };
+
     const updateUserCommand = new UpdateItemCommand({
       TableName: this.tableName,
       Key: { userId: { S: id } },
-      AttributeUpdates: {
-        updatedAt: { Value: { S: new Date().toISOString() } },
-        email: !!email ? { Value: { S: email } } : {},
-        firstName: !!firstName ? { Value: { S: firstName } } : {},
-        lastName: !!lastName ? { Value: { S: lastName } } : {},
-      },
+      AttributeUpdates,
       ReturnValues: "ALL_NEW",
     });
 
     const user = await this.send(updateUserCommand).then((data) => {
+      debugger;
       if (!data.Attributes) throw new Error("User not found");
 
       return {
