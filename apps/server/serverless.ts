@@ -11,7 +11,7 @@ const serverlessConfiguration: AWS = {
     runtime: "nodejs16.x",
     region: "eu-central-1",
     profile: "vidvely",
-    timeout: 30,
+    timeout: 25,
     httpApi: {
       cors: {
         allowCredentials: true,

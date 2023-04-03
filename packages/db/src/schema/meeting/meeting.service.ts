@@ -1,4 +1,4 @@
-import { AttributeValue, GetItemCommand, PutItemCommand, ScalarAttributeType, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
+import { AttributeValue, GetItemCommand, PutItemCommand, ScalarAttributeType, UpdateItemCommand, UpdateItemInput } from "@aws-sdk/client-dynamodb";
 import { Dynamo } from "../../client";
 import { CreateMeetingInput, UpdateMeetingInput } from "./meeting.type";
 
@@ -59,18 +59,21 @@ export class MeetingService extends Dynamo {
 
     const currentMeeting = await this.find(id);
 
+    const AttributeUpdates: UpdateItemInput["AttributeUpdates"] = {
+      updatedAt: { Value: { S: new Date().toISOString() } },
+    };
+    if (!!data) AttributeUpdates.data = { Value: { S: data } };
+    if (!!userId) AttributeUpdates.users = { Value: { SS: [...currentMeeting.users, userId] } };
+
     const updateMeetingCommand = new UpdateItemCommand({
       TableName: this.tableName,
       Key: { meetingId: { S: id } },
-      AttributeUpdates: {
-        updatedAt: { Value: { S: new Date().toISOString() } },
-        data: !!data ? { Value: { S: data } } : {},
-        users: !!userId ? { Value: { SS: [...currentMeeting.users, userId] } } : {},
-      },
+      AttributeUpdates,
       ReturnValues: "ALL_NEW",
     });
 
     const meeting = await this.send(updateMeetingCommand).then((data) => {
+      debugger;
       if (!data.Attributes) throw new Error("Meeting not found");
 
       return {
