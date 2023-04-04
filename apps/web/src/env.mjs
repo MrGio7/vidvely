@@ -8,7 +8,6 @@ const server = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]),
   // Add `.min(1) on ID and SECRET if you want to make sure they're not empty
   COGNITO_CLIENT_ID: z.string(),
-  COGNITO_CLIENT_SECRET: z.string(),
   COGNITO_DOMAIN: z.string(),
   NEXT_ORIGIN: z.string(),
   NEXT_PUBLIC_TRPC_ORIGIN: z.string(),
@@ -31,7 +30,6 @@ const client = z.object({
 const processEnv = {
   NODE_ENV: process.env.NODE_ENV,
   COGNITO_CLIENT_ID: process.env.COGNITO_CLIENT_ID,
-  COGNITO_CLIENT_SECRET: process.env.COGNITO_CLIENT_SECRET,
   COGNITO_DOMAIN: process.env.COGNITO_DOMAIN,
   NEXT_ORIGIN: process.env.NEXT_ORIGIN,
   NEXT_PUBLIC_TRPC_ORIGIN: process.env.NEXT_PUBLIC_TRPC_ORIGIN,
