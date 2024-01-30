@@ -6,9 +6,8 @@ Vidvely is a video conferencing web application, similar to Google Meet, built u
 
 To get started with Vidvely, clone the repository to your local machine and install the necessary dependencies.
 
-git clone https://github.com/your-username/vidvely.git
 cd vidvely
-npm install
+npm ci
 
 ### Setting Up AWS Services
 
